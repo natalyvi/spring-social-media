@@ -34,6 +34,10 @@ public class Tweet {
     @JoinColumn(name = "tweet_id")
     private Tweet repostOf;
 
-    @OneToMany(mappedBy = "tweet")
-    private Hashtag hashtag;
+    @ManyToMany
+    @JoinTable(
+            name = "tweet_hashtags",
+            joinColumns = @JoinColumn(name = "tweet_id"),
+            inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
+    private Set<Hashtag> hashtags;
 }
