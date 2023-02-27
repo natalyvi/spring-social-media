@@ -40,4 +40,10 @@ public class Tweet {
             joinColumns = @JoinColumn(name = "tweet_id"),
             inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
     private Set<Hashtag> hashtags;
+
+    @ManyToMany(mappedBy = "likes")
+    private Set<User> likedBy;
+
+    @ManyToMany(mappedBy = "mentions")
+    private Set<User> mentionedBy;
 }
