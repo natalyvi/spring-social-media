@@ -7,7 +7,8 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Set;
 
-@Entity(name = "user_table")
+@Entity
+@Table(name = "user_table")
 @Data
 @NoArgsConstructor
 public class User {
@@ -32,7 +33,7 @@ public class User {
 
     private String phone;
 
-    @OneToMany(mappedBy = "tweet")
+    @OneToMany(mappedBy = "author")
     private Set<Tweet> tweets;
 
     @ManyToMany
