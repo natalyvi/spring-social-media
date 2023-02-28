@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 public class TweetResponseDto {
     private Integer id;
 
-    private Timestamp posted; // must be generated upon creation
+    private Timestamp posted;
 
     private boolean deleted;
 
