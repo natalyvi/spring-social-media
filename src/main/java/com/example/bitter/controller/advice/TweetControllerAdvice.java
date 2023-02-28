@@ -18,4 +18,6 @@ public class TweetControllerAdvice {
    public ErrorDto handleBadRequestException(HttpServletRequest request, BadRequestException badRequestException) {
        return new ErrorDto(badRequestException.getMessage());
    }
+
+   // TODO: add other exceptions here
 }
