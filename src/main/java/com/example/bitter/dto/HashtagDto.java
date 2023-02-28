@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class HashtagResponseDto {
+public class HashtagDto {
 
     private Integer id;
 
