@@ -2,7 +2,6 @@ package com.example.bitter.mapper;
 
 import org.mapstruct.Mapper;
 
-import com.example.bitter.dto.HashtagDto;
 import com.example.bitter.entity.Hashtag;
 
 @Mapper(componentModel = "spring")
