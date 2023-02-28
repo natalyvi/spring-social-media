@@ -2,6 +2,7 @@ package com.example.bitter.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -17,21 +18,16 @@ public class User {
     @GeneratedValue
     private Integer id;
 
-    private String username;
+    @Embedded
+    private Credentials credentials;
 
-    private String password;
-
+    @CreationTimestamp
     private Timestamp joined;
 
     private boolean deleted;
 
-    private String firstName;
-
-    private String lastName;
-
-    private String email;
-
-    private String phone;
+    @Embedded
+    private Profile profile;
 
     @OneToMany(mappedBy = "author")
     private Set<Tweet> tweets;
