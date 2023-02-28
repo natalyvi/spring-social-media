@@ -26,14 +26,14 @@ public class Tweet {
     private User author;
 
     @ManyToOne
-    @JoinColumn(name = "tweet_id")
+    @JoinColumn(name = "in_reply_to_id")
     private Tweet inReplyTo;
 
     @OneToMany(mappedBy = "inReplyTo")
     private Set<Tweet> replies;
 
     @ManyToOne
-    @JoinColumn(name = "tweet_id")
+    @JoinColumn(name = "repost_of_id")
     private Tweet repostOf;
 
     @OneToMany(mappedBy = "repostOf")
