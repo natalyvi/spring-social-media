@@ -29,9 +29,15 @@ public class Tweet {
     @JoinColumn(name = "tweet_id")
     private Tweet inReplyTo;
 
+    @OneToMany(mappedBy = "inReplyTo")
+    private Set<Tweet> replies;
+
     @ManyToOne
     @JoinColumn(name = "tweet_id")
     private Tweet repostOf;
+
+    @OneToMany(mappedBy = "repostOf")
+    private Set<Tweet> reposts;
 
     @ManyToMany
     @JoinTable(
