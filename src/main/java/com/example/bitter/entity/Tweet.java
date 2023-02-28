@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -19,8 +20,6 @@ public class Tweet {
     private boolean deleted;
 
     private String content;
-
-    // TODO: add User and Hashtag imports
 
     @ManyToOne
     @JoinColumn(name = "user_id")
