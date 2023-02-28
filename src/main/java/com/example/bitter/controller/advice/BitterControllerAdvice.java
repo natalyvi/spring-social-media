@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 
-@ControllerAdvice(basePackages = {"com.example.bitter.controllers"})
+@ControllerAdvice(basePackages = {"com.example.bitter.controller"})
 @ResponseBody
-public class TweetControllerAdvice {
+public class BitterControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BadRequestException.class)
    public ErrorDto handleBadRequestException(HttpServletRequest request, BadRequestException badRequestException) {
