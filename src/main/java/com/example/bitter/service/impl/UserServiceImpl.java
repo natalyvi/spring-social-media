@@ -61,4 +61,10 @@ public class UserServiceImpl implements UserService {
 
         return new ResponseEntity<>(userMapper.entityToDto(userToDelete), HttpStatus.OK);
     }
+//
+//    @Override
+//    public ResponseEntity<UserResponseDto> updateUserByUsername(String username) {
+//        return new ResponseEntity<>(a);
+//
+//    }
 }
