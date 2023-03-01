@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -30,14 +31,14 @@ public class Tweet {
     private Tweet inReplyTo;
 
     @OneToMany(mappedBy = "inReplyTo")
-    private Set<Tweet> replies;
+    private List<Tweet> replies;
 
     @ManyToOne
     @JoinColumn(name = "repost_of_id")
     private Tweet repostOf;
 
     @OneToMany(mappedBy = "repostOf")
-    private Set<Tweet> reposts;
+    private List<Tweet> reposts;
 
     @ManyToMany
     @JoinTable(

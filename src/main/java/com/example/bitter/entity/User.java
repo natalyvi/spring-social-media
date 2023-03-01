@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -30,7 +31,7 @@ public class User {
     private Profile profile;
 
     @OneToMany(mappedBy = "author")
-    private Set<Tweet> tweets;
+    private List<Tweet> tweets;
 
     @ManyToMany
     @JoinTable(
@@ -38,7 +39,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "tweet_id")
     )
-    private Set<Tweet> likes;
+    private List<Tweet> likes;
 
     @ManyToMany
     @JoinTable(
@@ -46,7 +47,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "tweet_id")
     )
-    private Set<Tweet> mentions;
+    private List<Tweet> mentions;
 
     @ManyToMany
     @JoinTable(
