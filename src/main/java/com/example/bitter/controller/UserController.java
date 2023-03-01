@@ -22,27 +22,22 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto userRequestDto){
-
+    public UserResponseDto createUser(@RequestBody UserRequestDto userRequestDto) {
         return userService.createUser(userRequestDto);
     }
 
     @GetMapping("/{username}")
-    public ResponseEntity<UserResponseDto> getUserByUsername(@PathVariable String username){
+    public UserResponseDto getUserByUsername(@PathVariable String username) {
         return userService.getUserByUsername(username);
     }
 
     @DeleteMapping("/{username}")
-    public ResponseEntity<UserResponseDto> deleteUserByUsername(@PathVariable String username){
+    public UserResponseDto deleteUserByUsername(@PathVariable String username) {
         return userService.deleteUserByusername(username);
     }
 
-//    @PatchMapping
-//    public ResponseEntity<UserResponseDto> updateUserByUsername(@PathVariable String username,
-//                                                                @RequestBody UserRequestDto userRequestDto){
-//        return userService.updateUserByUsername(username);
-
+    @PatchMapping("/{username}")
+    public UserResponseDto updateUserProfileByUsername(@PathVariable String username, @RequestBody UserRequestDto userRequestDto) {
+        return userService.updateUserProfileByUsername(username, userRequestDto);
     }
-
-
-
+}
