@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -14,9 +15,9 @@ import java.util.Set;
 public class Tweet {
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
-    private Timestamp posted; // must be generated upon creation
+    private Timestamp posted = Timestamp.valueOf(LocalDateTime.now()); // must be generated upon creation
 
     private boolean deleted;
 

@@ -12,6 +12,6 @@ public class ContextDto {
     private Tweet target;
 
     // must be in chronological order
-    private List<Tweet> before;
-    private List<Tweet> after;
+    private List<TweetResponseDto> before;
+    private List<TweetResponseDto> after;
 }
