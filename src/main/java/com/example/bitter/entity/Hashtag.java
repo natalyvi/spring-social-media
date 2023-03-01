@@ -25,8 +25,6 @@ public class Hashtag {
 
     private Timestamp lastUsed;
 
-    private Boolean deleted;
-
     @ManyToMany(mappedBy = "hashtags")
     private Set<Tweet> tweets;
 
