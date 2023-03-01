@@ -37,5 +37,12 @@ public class UserController {
         return userService.deleteUserByusername(username);
     }
 
+//    @PatchMapping
+//    public ResponseEntity<UserResponseDto> updateUserByUsername(@PathVariable String username,
+//                                                                @RequestBody UserRequestDto userRequestDto){
+//        return userService.updateUserByUsername(username);
 
-}
+    }
+
+
+

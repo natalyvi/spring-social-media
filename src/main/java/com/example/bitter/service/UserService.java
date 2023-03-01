@@ -14,4 +14,7 @@ public interface UserService {
     ResponseEntity<UserResponseDto> getUserByUsername(String username);
 
     ResponseEntity<UserResponseDto> deleteUserByusername(String username);
+
+//    ResponseEntity<UserResponseDto> updateUserByUsername(String username);
+
 }
