@@ -123,7 +123,12 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public List<UserResponseDto> getUsersWhoLikedTweet(Long id) {
-        return null;
+        Tweet tweet = getTweetIfExists(id);
+        List<User> users = new ArrayList<>(tweet.getLikedBy());
+        for (User u : users) {
+            if (u.isDeleted()) users.remove(u);
+        }
+        return userMapper.entitiesToDtos(users);
     }
 
     @Override
