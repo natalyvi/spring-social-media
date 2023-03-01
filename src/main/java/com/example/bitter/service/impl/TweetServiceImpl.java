@@ -3,6 +3,7 @@ package com.example.bitter.service.impl;
 import com.example.bitter.dto.CredentialsDto;
 import com.example.bitter.dto.TweetRequestDto;
 import com.example.bitter.dto.TweetResponseDto;
+import com.example.bitter.dto.UserResponseDto;
 import com.example.bitter.entity.Tweet;
 import com.example.bitter.entity.User;
 import com.example.bitter.exception.BadRequestException;
@@ -34,6 +35,11 @@ public class TweetServiceImpl implements TweetService {
 
     private final UserRepository userRepository;
 
+    public Tweet getTweetIfExists(Long id) {
+        Optional<Tweet> tweet = tweetRepository.findById(id);
+        if (tweet.isEmpty() || tweet.get().isDeleted()) throw new NotFoundException("Tweet " + id + " not found");
+        return tweet.get();
+    }
 
     // Must be in reverse-chronological order
     @Override
@@ -44,9 +50,7 @@ public class TweetServiceImpl implements TweetService {
     // Throw error if no such tweet exists or is deleted
     @Override
     public TweetResponseDto getTweet(Long id) {
-        Optional<Tweet> tweet = tweetRepository.findById(id);
-        if (tweet.isEmpty() || tweet.get().isDeleted()) throw new NotFoundException("Tweet " + id + " not found");
-        return tweetMapper.entityToDto(tweet.get());
+        return tweetMapper.entityToDto(getTweetIfExists(id));
     }
 
     public Tweet parseAndUpdateMentions(Tweet tweet, User user) {
@@ -97,7 +101,7 @@ public class TweetServiceImpl implements TweetService {
     // On successful operation, return no response body
     @Override
     public void likeTweet(Long id, CredentialsDto credentialsDto) {
-        Tweet tweet = tweetMapper.responseToEntity(getTweet(id));
+        Tweet tweet = getTweetIfExists(id);
         User user = null;
         try {
             user = userMapper.responseToEntity(userService.getUserByUsername(credentialsDto.getUsername()).getBody());
@@ -114,5 +118,38 @@ public class TweetServiceImpl implements TweetService {
         List<Tweet> t = user.getLikes();
         t.add(savedTweet);
         userRepository.saveAndFlush(user);
+    }
+
+
+    @Override
+    public List<UserResponseDto> getUsersWhoLikedTweet(Long id) {
+        return null;
+    }
+
+    @Override
+    public List<UserResponseDto> getTweetMentions(Long id) {
+        return null;
+    }
+
+    @Override
+    public List<TweetResponseDto> getRepliesToTweet(Long id) {
+        return null;
+    }
+
+    @Override
+    public TweetResponseDto repostTweet(Long id) {
+        return null;
+    }
+
+    @Override
+    public TweetResponseDto getRepostsOfTweet(Long id) {
+        return null;
+    }
+
+    @Override
+    public TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto) {
+        Tweet tweet = getTweetIfExists(id);
+        tweet.setDeleted(true);
+        return tweetMapper.entityToDto(tweetRepository.saveAndFlush(tweet));
     }
 }
