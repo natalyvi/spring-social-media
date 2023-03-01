@@ -53,22 +53,28 @@ public class TweetServiceImpl implements TweetService {
         return tweetMapper.entityToDto(getTweetIfExists(id));
     }
 
-    public Tweet parseAndUpdateMentions(Tweet tweet, User user) {
+    public Tweet parseAndUpdateMentions(Tweet tweet) {
         Pattern pattern = Pattern.compile("^(@[a-zA-Z0-9_]{1,}[\\s\\S])*$");
-        List<String> mentions = new ArrayList();
+        Set<User> mentions = new HashSet<>();
         Matcher matcher = pattern.matcher(tweet.getContent());
+
+        // parse usernames
         while (matcher.find()) {
-            mentions.add(matcher.group().substring(1));
+            String username = matcher.group().substring(1);
+            mentions.add(userMapper.responseToEntity(userService.getUserByUsername(username).getBody()));
         }
-
-        List<Tweet> t = user.getMentions();
-        t.add(tweet);
-        user.setMentions(t);
-        User savedUser = userRepository.saveAndFlush(user);
-
+        // update tweet mentions for each user
+        for (User user : mentions) {
+            List<Tweet> t = user.getMentions();
+            t.add(tweet);
+            user.setMentions(t);
+            userRepository.saveAndFlush(user);
+        }
+        // update tweet
         Set<User> u = tweet.getMentioned();
-        u.add(savedUser);
+        u.addAll(mentions);
         tweet.setMentioned(u);
+
         return tweetRepository.saveAndFlush(tweet);
     }
 
@@ -78,12 +84,8 @@ public class TweetServiceImpl implements TweetService {
     @Override
     public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
         // check if user exists
-        User user = null;
-        try {
-            user = userMapper.responseToEntity(userService.getUserByUsername(tweetRequestDto.getCredentials().getUsername()).getBody());
-        } catch (NotFoundException e) {
-            throw e;
-        }
+        User user;
+        user = userMapper.responseToEntity(userService.getUserByUsername(tweetRequestDto.getCredentials().getUsername()).getBody());
         if (user == null) throw new BadRequestException("Invalid credentials");
 
         Tweet tweet = tweetMapper.dtoToEntity(tweetRequestDto);
@@ -92,7 +94,7 @@ public class TweetServiceImpl implements TweetService {
         tweet.setAuthor(user);
 
         // TODO: parse hashtags and mentions
-        Tweet updatedTweet = parseAndUpdateMentions(tweet, user);
+        Tweet updatedTweet = parseAndUpdateMentions(tweet);
 
         return tweetMapper.entityToDto(tweetRepository.saveAndFlush(tweet));
     }
@@ -102,12 +104,8 @@ public class TweetServiceImpl implements TweetService {
     @Override
     public void likeTweet(Long id, CredentialsDto credentialsDto) {
         Tweet tweet = getTweetIfExists(id);
-        User user = null;
-        try {
-            user = userMapper.responseToEntity(userService.getUserByUsername(credentialsDto.getUsername()).getBody());
-        } catch (NotFoundException e) {
-            throw e;
-        }
+        User user;
+        user = userMapper.responseToEntity(userService.getUserByUsername(credentialsDto.getUsername()).getBody());
         if (user == null) throw new BadRequestException("Invalid credentials");
 
         Set<User> u = tweet.getLikedBy();
@@ -125,9 +123,7 @@ public class TweetServiceImpl implements TweetService {
     public List<UserResponseDto> getUsersWhoLikedTweet(Long id) {
         Tweet tweet = getTweetIfExists(id);
         List<User> users = new ArrayList<>(tweet.getLikedBy());
-        for (User u : users) {
-            if (u.isDeleted()) users.remove(u);
-        }
+        users.removeIf(User::isDeleted);
         return userMapper.entitiesToDtos(users);
     }
 
@@ -135,15 +131,14 @@ public class TweetServiceImpl implements TweetService {
     public List<UserResponseDto> getTweetMentions(Long id) {
         Tweet tweet = getTweetIfExists(id);
         List<User> users = new ArrayList<>(tweet.getMentioned());
-        for (User u : users) {
-            if (u.isDeleted()) users.remove(u);
-        }
+        users.removeIf(User::isDeleted);
         return userMapper.entitiesToDtos(users);
     }
 
     @Override
     public List<TweetResponseDto> getRepliesToTweet(Long id) {
-        return null;
+        Tweet tweet = getTweetIfExists(id);
+        return tweetMapper.entitiesToDtos(tweet.getReplies());
     }
 
     @Override
@@ -152,8 +147,9 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public TweetResponseDto getRepostsOfTweet(Long id) {
-        return null;
+    public List<TweetResponseDto> getRepostsOfTweet(Long id) {
+        Tweet tweet = getTweetIfExists(id);
+        return tweetMapper.entitiesToDtos(tweet.getReposts());
     }
 
     @Override

@@ -24,7 +24,7 @@ public interface TweetService {
 
     TweetResponseDto repostTweet(Long id);
 
-    TweetResponseDto getRepostsOfTweet(Long id);
+    List<TweetResponseDto> getRepostsOfTweet(Long id);
 
     TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto);
 }

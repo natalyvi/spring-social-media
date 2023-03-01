@@ -79,7 +79,7 @@ public class TweetController {
 
     // GET tweets/{id}/reposts
     @GetMapping("/{id}/reposts")
-    public TweetResponseDto getRepostsOfTweet(@PathVariable Long id) {
+    public List<TweetResponseDto> getRepostsOfTweet(@PathVariable Long id) {
         return tweetService.getRepostsOfTweet(id);
     }
 
