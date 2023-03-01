@@ -10,4 +10,6 @@ public interface UserService {
     List<UserResponseDto> getAllUsers();
 
     ResponseEntity<UserResponseDto> createUser(UserRequestDto userRequestDto);
+
+    ResponseEntity<UserResponseDto> getUserByUsername(String username);
 }

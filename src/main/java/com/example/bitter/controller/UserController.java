@@ -27,5 +27,10 @@ public class UserController {
         return userService.createUser(userRequestDto);
     }
 
+    @GetMapping("/{username}")
+    public ResponseEntity<UserResponseDto> getUserByUsername(@PathVariable String username){
+        return userService.getUserByUsername(username);
+    }
+
 
 }

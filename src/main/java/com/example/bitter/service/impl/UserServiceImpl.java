@@ -38,4 +38,15 @@ public class UserServiceImpl implements UserService {
 
         return new ResponseEntity<>(userMapper.entityToDto(userToSave), HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<UserResponseDto> getUserByUsername(String username) {
+        if(!userRepository.existsByCredentials_Username(username) ||
+        userRepository.findUserByCredentials_Username(username).isDeleted()){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        User userByCredentialsUsername = userRepository.findUserByCredentials_Username(username);
+
+        return new ResponseEntity<>(userMapper.entityToDto(userByCredentialsUsername),HttpStatus.OK);
+    }
 }
