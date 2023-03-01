@@ -1,5 +1,6 @@
 package com.example.bitter.mapper;
 
+import com.example.bitter.dto.UserRequestDto;
 import com.example.bitter.dto.UserResponseDto;
 import com.example.bitter.entity.User;
 import org.mapstruct.Mapper;
@@ -14,5 +15,7 @@ public interface UserMapper {
     UserResponseDto entityToDto(User entity);
 
     List<UserResponseDto> entitiesToDtos(List<User> entities);
+
+    User dtoToEntity(UserRequestDto userRequestDto);
 
 }

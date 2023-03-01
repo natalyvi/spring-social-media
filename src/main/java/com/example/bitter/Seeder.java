@@ -40,7 +40,7 @@ public class Seeder implements CommandLineRunner {
         credentials2.setUsername("user2");
         credentials2.setPassword("bebs");
         user2.setCredentials(credentials2);
-        user2.setJoined(new Timestamp(System.currentTimeMillis()));
+//        user2.setJoined(new Timestamp(System.currentTimeMillis()));
         user2.setDeleted(false);
         Profile profile2 = new Profile();
         profile2.setFirstName("mmn");
