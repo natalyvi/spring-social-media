@@ -4,7 +4,6 @@ import com.example.bitter.dto.UserRequestDto;
 import com.example.bitter.dto.UserResponseDto;
 import com.example.bitter.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,7 +32,7 @@ public class UserController {
 
     @DeleteMapping("/{username}")
     public UserResponseDto deleteUserByUsername(@PathVariable String username) {
-        return userService.deleteUserByusername(username);
+        return userService.deleteUserByUsername(username);
     }
 
     @PatchMapping("/{username}")

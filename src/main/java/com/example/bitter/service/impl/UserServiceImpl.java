@@ -10,8 +10,6 @@ import com.example.bitter.mapper.UserMapper;
 import com.example.bitter.repository.UserRepository;
 import com.example.bitter.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -60,7 +58,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto deleteUserByusername(String username) {
+    public UserResponseDto deleteUserByUsername(String username) {
         if (!userRepository.existsByCredentials_Username(username)) {
             throw new NotFoundException("The provided username doesn't exist.");
         }
