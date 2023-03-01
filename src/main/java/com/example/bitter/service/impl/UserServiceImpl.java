@@ -49,4 +49,16 @@ public class UserServiceImpl implements UserService {
 
         return new ResponseEntity<>(userMapper.entityToDto(userByCredentialsUsername),HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<UserResponseDto> deleteUserByusername(String username) {
+        if(!userRepository.existsByCredentials_UsernameAndDeletedFalse(username)){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        User userToDelete = userRepository.findUserByCredentials_Username(username);
+        userToDelete.setDeleted(true);
+        userRepository.saveAndFlush(userToDelete);
+
+        return new ResponseEntity<>(userMapper.entityToDto(userToDelete), HttpStatus.OK);
+    }
 }

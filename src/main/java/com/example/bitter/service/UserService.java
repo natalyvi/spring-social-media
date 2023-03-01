@@ -12,4 +12,6 @@ public interface UserService {
     ResponseEntity<UserResponseDto> createUser(UserRequestDto userRequestDto);
 
     ResponseEntity<UserResponseDto> getUserByUsername(String username);
+
+    ResponseEntity<UserResponseDto> deleteUserByusername(String username);
 }

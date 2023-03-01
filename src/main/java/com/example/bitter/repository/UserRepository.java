@@ -15,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Boolean existsByCredentials_Username(String username);
 
+    Boolean existsByCredentials_UsernameAndDeletedFalse(String username);
+
 }
