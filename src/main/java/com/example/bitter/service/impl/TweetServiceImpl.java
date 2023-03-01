@@ -57,14 +57,14 @@ public class TweetServiceImpl implements TweetService {
             mentions.add(matcher.group().substring(1));
         }
 
-        List<Tweet> a = user.getMentions();
-        a.add(tweet);
-        user.setMentions(a);
+        List<Tweet> t = user.getMentions();
+        t.add(tweet);
+        user.setMentions(t);
         User savedUser = userRepository.saveAndFlush(user);
 
-        Set<User> b = tweet.getMentioned();
-        b.add(savedUser);
-        tweet.setMentioned(b);
+        Set<User> u = tweet.getMentioned();
+        u.add(savedUser);
+        tweet.setMentioned(u);
         return tweetRepository.saveAndFlush(tweet);
     }
 
@@ -97,8 +97,7 @@ public class TweetServiceImpl implements TweetService {
     // On successful operation, return no response body
     @Override
     public void likeTweet(Long id, CredentialsDto credentialsDto) {
-
-
+        Tweet tweet = tweetMapper.responseToEntity(getTweet(id));
         User user = null;
         try {
             user = userMapper.responseToEntity(userService.getUserByUsername(credentialsDto.getUsername()).getBody());
@@ -107,5 +106,13 @@ public class TweetServiceImpl implements TweetService {
         }
         if (user == null) throw new BadRequestException("Invalid credentials");
 
+        Set<User> u = tweet.getLikedBy();
+        u.add(user);
+        tweet.setLikedBy(u);
+        Tweet savedTweet = tweetRepository.saveAndFlush(tweet);
+
+        List<Tweet> t = user.getLikes();
+        t.add(savedTweet);
+        userRepository.saveAndFlush(user);
     }
 }
