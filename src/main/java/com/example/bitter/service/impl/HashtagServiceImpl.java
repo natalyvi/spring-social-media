@@ -25,8 +25,8 @@ public class HashtagServiceImpl implements HashtagService{
     }
     @Override
     public List<TweetResponseDto> getAllTweetsWithTag(String label) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllTweetsWithTag'");
+        // TODO: Will need methods from TweetService
+        return null;
     }
 
 }
