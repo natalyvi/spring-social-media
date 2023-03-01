@@ -4,6 +4,7 @@ import com.example.bitter.dto.CredentialsDto;
 import com.example.bitter.dto.TweetRequestDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.entity.Tweet;
+import com.example.bitter.entity.User;
 import com.example.bitter.exception.BadRequestException;
 import com.example.bitter.exception.NotFoundException;
 import com.example.bitter.mapper.TweetMapper;
@@ -31,7 +32,7 @@ public class TweetServiceImpl implements TweetService {
     // Must be in reverse-chronological order
     @Override
     public List<TweetResponseDto> getAllTweets() {
-        return null;
+        return tweetMapper.entitiesToDtos(tweetRepository.findByDeletedFalseOrderByPosted());
     }
 
     // Throw error if no such tweet exists or is deleted
@@ -46,7 +47,9 @@ public class TweetServiceImpl implements TweetService {
     @Override
     public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
         // check if user exists
-        try (userService.getUser(tweetRequestDto.getCredentials().getUsername())) {
+        User user = null;
+        try {
+            user = userService.getUser(tweetRequestDto.getCredentials().getUsername());
         } catch (NotFoundException e) {
             throw e;
         }
@@ -54,7 +57,7 @@ public class TweetServiceImpl implements TweetService {
         Tweet tweet = tweetMapper.dtoToEntity(tweetRequestDto);
         if (tweet.getContent() == null) throw new BadRequestException("New tweet must contain content");
 
-        tweet.setAuthor(userService.getUser(tweetRequestDto.getCredentials().getUsername()));
+        tweet.setAuthor(user);
         tweet.setPosted(new Timestamp(Instant.now().getEpochSecond()));
 
         return tweetMapper.entityToDto(tweetRepository.saveAndFlush(tweet));
