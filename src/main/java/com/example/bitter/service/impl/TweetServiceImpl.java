@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,7 +44,9 @@ public class TweetServiceImpl implements TweetService {
     // Throw error if no such tweet exists or is deleted
     @Override
     public TweetResponseDto getTweet(Long id) {
-        return null;
+        Optional<Tweet> tweet = tweetRepository.findById(id);
+        if (tweet.isEmpty() || tweet.get().isDeleted()) throw new NotFoundException("Tweet " + id + " not found");
+        return tweetMapper.entityToDto(tweet.get());
     }
 
     public Tweet parseAndUpdateMentions(Tweet tweet, User user) {
@@ -98,6 +97,15 @@ public class TweetServiceImpl implements TweetService {
     // On successful operation, return no response body
     @Override
     public void likeTweet(Long id, CredentialsDto credentialsDto) {
+
+
+        User user = null;
+        try {
+            user = userMapper.responseToEntity(userService.getUserByUsername(credentialsDto.getUsername()).getBody());
+        } catch (NotFoundException e) {
+            throw e;
+        }
+        if (user == null) throw new BadRequestException("Invalid credentials");
 
     }
 }
