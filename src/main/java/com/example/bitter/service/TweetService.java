@@ -9,9 +9,9 @@ import java.util.List;
 public interface TweetService {
     List<TweetResponseDto> getAllTweets();
 
-    TweetResponseDto getTweet(Integer id);
+    TweetResponseDto getTweet(Long id);
 
     TweetResponseDto createTweet(TweetRequestDto tweetRequestDto);
 
-    void likeTweet(Integer id, CredentialsDto credentialsDto);
+    void likeTweet(Long id, CredentialsDto credentialsDto);
 }

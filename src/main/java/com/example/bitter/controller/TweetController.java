@@ -24,7 +24,7 @@ public class TweetController {
 
     // GET tweets/{id}
     @GetMapping("/{id}")
-    public TweetResponseDto getTweet(@PathVariable Integer id) {
+    public TweetResponseDto getTweet(@PathVariable Long id) {
         return tweetService.getTweet(id);
     }
 
@@ -37,7 +37,7 @@ public class TweetController {
 
     // POST tweets/{id}/like
     @PostMapping("/{id}")
-    public void likeTweet(@PathVariable Integer id, CredentialsDto credentialsDto) {
+    public void likeTweet(@PathVariable Long id, CredentialsDto credentialsDto) {
         tweetService.likeTweet(id, credentialsDto);
     }
 }

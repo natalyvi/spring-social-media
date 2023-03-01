@@ -46,11 +46,11 @@ public class TweetServiceImpl implements TweetService {
 
     // Throw error if no such tweet exists or is deleted
     @Override
-    public TweetResponseDto getTweet(Integer id) {
+    public TweetResponseDto getTweet(Long id) {
         return null;
     }
 
-    public void parseAndUpdateMentions(Tweet tweet, User user) {
+    public Tweet parseAndUpdateMentions(Tweet tweet, User user) {
         Pattern pattern = Pattern.compile("^(@[a-zA-Z0-9_]{1,}[\\s\\S])*$");
         List<String> mentions = new ArrayList();
         Matcher matcher = pattern.matcher(tweet.getContent());
@@ -66,7 +66,7 @@ public class TweetServiceImpl implements TweetService {
         Set<User> b = tweet.getMentioned();
         b.add(savedUser);
         tweet.setMentioned(b);
-        tweetRepository.saveAndFlush(tweet);
+        return tweetRepository.saveAndFlush(tweet);
     }
 
     // Create simple tweet, w/ author set to the user identified by the credentials in the request body
@@ -77,7 +77,7 @@ public class TweetServiceImpl implements TweetService {
         // check if user exists
         User user = null;
         try {
-            user = userMapper.dtoToEntity(userService.getUserByUsername(tweetRequestDto.getCredentials().getUsername()));
+            user = userMapper.responseToEntity(userService.getUserByUsername(tweetRequestDto.getCredentials().getUsername()).getBody());
         } catch (NotFoundException e) {
             throw e;
         }
@@ -89,13 +89,15 @@ public class TweetServiceImpl implements TweetService {
         tweet.setAuthor(user);
 
         // TODO: parse hashtags and mentions
+        Tweet updatedTweet = parseAndUpdateMentions(tweet, user);
+
         return tweetMapper.entityToDto(tweetRepository.saveAndFlush(tweet));
     }
 
     // Throw error is the tweet is deleted or doesn't exist, or if the credentials don't match an active user in the DB
     // On successful operation, return no response body
     @Override
-    public void likeTweet(Integer id, CredentialsDto credentialsDto) {
+    public void likeTweet(Long id, CredentialsDto credentialsDto) {
 
     }
 }
