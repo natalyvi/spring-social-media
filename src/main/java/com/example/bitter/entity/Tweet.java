@@ -5,6 +5,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -13,9 +15,9 @@ import java.util.Set;
 public class Tweet {
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
-    private Timestamp posted; // must be generated upon creation
+    private Timestamp posted = Timestamp.valueOf(LocalDateTime.now()); // must be generated upon creation
 
     private boolean deleted;
 
@@ -30,14 +32,14 @@ public class Tweet {
     private Tweet inReplyTo;
 
     @OneToMany(mappedBy = "inReplyTo")
-    private Set<Tweet> replies;
+    private List<Tweet> replies;
 
     @ManyToOne
     @JoinColumn(name = "repost_of_id")
     private Tweet repostOf;
 
     @OneToMany(mappedBy = "repostOf")
-    private Set<Tweet> reposts;
+    private List<Tweet> reposts;
 
     @ManyToMany
     @JoinTable(
@@ -50,5 +52,5 @@ public class Tweet {
     private Set<User> likedBy;
 
     @ManyToMany(mappedBy = "mentions")
-    private Set<User> mentionedBy;
+    private Set<User> mentioned;
 }

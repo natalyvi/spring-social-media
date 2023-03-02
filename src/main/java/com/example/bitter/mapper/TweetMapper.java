@@ -8,11 +8,13 @@ import org.mapstruct.Mapper;
 import java.util.List;
 import java.util.Set;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { UserMapper.class })
 public interface TweetMapper {
     TweetResponseDto entityToDto(Tweet entity);
 
     // TODO: List vs Set depends on endpoint requirements
-    List<TweetResponseDto> entitiesToDtos(Set<Tweet> entities);
+    List<TweetResponseDto> entitiesToDtos(List<Tweet> entities);
     Tweet dtoToEntity(TweetRequestDto tweetRequestDto);
+
+    Tweet responseToEntity(TweetResponseDto tweetResponseDto);
 }

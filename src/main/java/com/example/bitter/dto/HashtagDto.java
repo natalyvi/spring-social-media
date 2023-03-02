@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 public class HashtagDto {
 
-    private Integer id;
-
     private String label;
 
     private Timestamp firstUsed;

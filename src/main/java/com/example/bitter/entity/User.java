@@ -1,11 +1,13 @@
 package com.example.bitter.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -16,7 +18,7 @@ public class User {
 
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
     @Embedded
     private Credentials credentials;
@@ -30,7 +32,8 @@ public class User {
     private Profile profile;
 
     @OneToMany(mappedBy = "author")
-    private Set<Tweet> tweets;
+    @EqualsAndHashCode.Exclude
+    private List<Tweet> tweets;
 
     @ManyToMany
     @JoinTable(
@@ -38,7 +41,8 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "tweet_id")
     )
-    private Set<Tweet> likes;
+    @EqualsAndHashCode.Exclude
+    private List<Tweet> likes;
 
     @ManyToMany
     @JoinTable(
@@ -46,7 +50,8 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "tweet_id")
     )
-    private Set<Tweet> mentions;
+    @EqualsAndHashCode.Exclude
+    private List<Tweet> mentions;
 
     @ManyToMany
     @JoinTable(
@@ -54,9 +59,11 @@ public class User {
             joinColumns = @JoinColumn(name = "follower_id"),
             inverseJoinColumns = @JoinColumn(name = "following_id")
     )
+    @EqualsAndHashCode.Exclude
     private Set<User> followers;
 
     @ManyToMany(mappedBy = "followers")
+    @EqualsAndHashCode.Exclude
     private Set<User> following;
 
 }

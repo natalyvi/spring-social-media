@@ -1,6 +1,7 @@
 package com.example.bitter.entity;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class Hashtag {
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
     private String label;
 
@@ -26,6 +27,6 @@ public class Hashtag {
     private Timestamp lastUsed;
 
     @ManyToMany(mappedBy = "hashtags")
-    private Set<Tweet> tweets;
+    private List<Tweet> tweets;
 
 }
