@@ -1,17 +1,18 @@
 package com.example.bitter.service.impl;
 
+import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserRequestDto;
 import com.example.bitter.dto.UserResponseDto;
+import com.example.bitter.entity.Tweet;
 import com.example.bitter.entity.User;
 import com.example.bitter.exception.BadRequestException;
 import com.example.bitter.exception.NotAuthorizedException;
 import com.example.bitter.exception.NotFoundException;
+import com.example.bitter.mapper.TweetMapper;
 import com.example.bitter.mapper.UserMapper;
 import com.example.bitter.repository.UserRepository;
 import com.example.bitter.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+    private final TweetMapper tweetMapper;
+
     @Override
     public List<UserResponseDto> getAllUsers() {
         return userMapper.entitiesToDtos(userRepository.findAllByDeletedFalse());
@@ -31,14 +34,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
+        if (userRequestDto.getCredentials() == null) {
+            throw new BadRequestException("Credentials can't be null.");
+        }
         if (userRequestDto.getCredentials().getUsername() == null) {
             throw new BadRequestException("The provided username is null.");
         }
         if (userRequestDto.getCredentials().getPassword() == null) {
             throw new BadRequestException("The provided password is null.");
         }
+        if (userRequestDto.getProfile() == null) {
+            throw new BadRequestException("Profile can't be null.");
+        }
         if (userRequestDto.getProfile().getEmail() == null) {
             throw new BadRequestException("The provided email is null.");
+        }
+        if (userRepository.existsByCredentials_Username(userRequestDto.getCredentials().getUsername())) {
+            throw new BadRequestException("The username already exists.");
         }
         User userToSave = userMapper.dtoToEntity(userRequestDto);
         userRepository.saveAndFlush(userToSave);
@@ -60,7 +72,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto deleteUserByusername(String username) {
+    public UserResponseDto deleteUserByUsername(String username) {
         if (!userRepository.existsByCredentials_Username(username)) {
             throw new NotFoundException("The provided username doesn't exist.");
         }
@@ -77,6 +89,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto updateUserProfileByUsername(String username, UserRequestDto userRequestDto) {
         User updatedUser = userMapper.dtoToEntity(userRequestDto);
+        if (updatedUser.getCredentials() == null) {
+            throw new BadRequestException("Credentials can't be null.");
+        }
         if (!userRepository.existsByCredentials_Username(username)) {
             throw new NotFoundException("The provided username doesn't exist.");
         }
@@ -89,14 +104,57 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findUserByCredentials_Username(username).isDeleted()) {
             throw new BadRequestException("The provided username is deleted.");
         }
-        if (updatedUser.getProfile().getEmail() == null){
-            throw new BadRequestException("The provided email is null.");
+        if (updatedUser.getProfile() == null) {
+            throw new BadRequestException("Profile can't be null.");
         }
         User userToUpdate = userRepository.findUserByCredentials_Username(username);
+        if (updatedUser.getProfile().getFirstName() == null) {
+            updatedUser.getProfile().setFirstName(userToUpdate.getProfile().getFirstName());
+        }
+        if (updatedUser.getProfile().getLastName() == null) {
+            updatedUser.getProfile().setLastName(userToUpdate.getProfile().getLastName());
+        }
+        if (updatedUser.getProfile().getEmail() == null) {
+            updatedUser.getProfile().setEmail(userToUpdate.getProfile().getEmail());
+        }
+        if (updatedUser.getProfile().getPhone() == null) {
+            updatedUser.getProfile().setPhone(userToUpdate.getProfile().getPhone());
+        }
         userToUpdate.setProfile(updatedUser.getProfile());
         userRepository.saveAndFlush(userToUpdate);
 
         return userMapper.entityToDto(userToUpdate);
     }
+
+    @Override
+    public List<TweetResponseDto> getTweets(String username) {
+        User userByUsername = userRepository.findUserByCredentials_Username(username);
+        List<Tweet> tweets = userByUsername.getTweets();
+
+        return tweetMapper.entitiesToDtos(tweets);
+    }
+
+//    // TODO: Test again after the users/@[username}/follow is done
+//    @Override
+//    public List<UserResponseDto> getFollowersOfTheUser(String username) {
+//        User userByUsername = userRepository.findUserByCredentials_Username(username);
+//        List<User> followers = userByUsername.getFollowers();
+//
+//        return userMapper.entitiesToDtos(followers);
+//    }
+
+//    @Override
+//    public List<UserResponseDto> getUsersFollowedByUsername(String username) {
+//        if (!userRepository.existsByCredentials_Username(username)) {
+//            throw new NotFoundException("The provided username doesn't exist.");
+//        }
+//        if (userRepository.findUserByCredentials_Username(username).isDeleted()) {
+//            throw new BadRequestException("The provided username is deleted.");
+//        }
+//        User userByUsername = userRepository.findUserByCredentials_Username(username);
+//        List<User> usersFollowedByUsername = userRepository.findUsersByFollowersContaining(userByUsername);
+//
+//        return userMapper.entitiesToDtos(usersFollowedByUsername);
+//    }
 
 }

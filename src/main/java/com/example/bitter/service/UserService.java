@@ -1,8 +1,8 @@
 package com.example.bitter.service;
 
+import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserRequestDto;
 import com.example.bitter.dto.UserResponseDto;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -13,8 +13,13 @@ public interface UserService {
 
     UserResponseDto getUserByUsername(String username);
 
-   UserResponseDto deleteUserByusername(String username);
+    UserResponseDto deleteUserByUsername(String username);
 
     UserResponseDto updateUserProfileByUsername(String username, UserRequestDto userRequestDto);
 
+//    List<UserResponseDto> getUsersFollowedByUsername(String username);
+
+//    List<UserResponseDto> getFollowersOfTheUser (String username);
+
+    List<TweetResponseDto> getTweets(String username);
 }

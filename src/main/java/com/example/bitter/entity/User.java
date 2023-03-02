@@ -8,7 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "user_table")
@@ -60,10 +59,10 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "following_id")
     )
     @EqualsAndHashCode.Exclude
-    private Set<User> followers;
+    private List<User> followers;
 
     @ManyToMany(mappedBy = "followers")
     @EqualsAndHashCode.Exclude
-    private Set<User> following;
+    private List<User> following;
 
 }
