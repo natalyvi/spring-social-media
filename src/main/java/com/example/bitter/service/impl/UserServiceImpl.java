@@ -11,11 +11,13 @@ import com.example.bitter.exception.NotAuthorizedException;
 import com.example.bitter.exception.NotFoundException;
 import com.example.bitter.mapper.TweetMapper;
 import com.example.bitter.mapper.UserMapper;
+import com.example.bitter.repository.TweetRepository;
 import com.example.bitter.repository.UserRepository;
 import com.example.bitter.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,6 +29,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private final TweetMapper tweetMapper;
+
+    private final TweetRepository tweetRepository;
 
     @Override
     public List<UserResponseDto> getAllUsers() {
@@ -192,6 +196,26 @@ public class UserServiceImpl implements UserService {
 
         userRepository.saveAndFlush(sourceUser);
         userRepository.saveAndFlush(targetUser);
+    }
+
+    @Override
+    public List<TweetResponseDto> getUserFeedByUsername(String username) {
+        if (!userRepository.existsByCredentials_Username(username) || userRepository.findUserByCredentials_Username(username).isDeleted()) {
+            throw new NotFoundException("The provided username doesn't exist.");
+        }
+        List<UserResponseDto> usersFollowedByUsername = getUsersFollowedByUsername(username);
+        List<String> usernames = new ArrayList<>();
+        usersFollowedByUsername.forEach(userResponseDto -> {
+            String usernameOfAuthor = userResponseDto.getUsername();
+            usernames.add(usernameOfAuthor);
+        });
+
+        List <User> feedAuthors = userRepository.findUsersByCredentials_UsernameIn(usernames);
+        User user = userRepository.findUserByCredentials_Username(username);
+        feedAuthors.add(user);
+        List<Tweet> feed = tweetRepository.findAllByDeletedFalseAndAuthorInOrderByPosted(feedAuthors);
+
+        return tweetMapper.entitiesToDtos(feed);
     }
 
     private void verifyUsers(String username, CredentialsDto credentials) {
