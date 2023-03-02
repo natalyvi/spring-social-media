@@ -195,7 +195,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void verifyUsers(String username, CredentialsDto credentials) {
-        if (credentials == null) {
+        if (credentials == null || credentials.getUsername() == null || credentials.getPassword() == null) {
             throw new BadRequestException("Credentials can't be null.");
         }
         if (!userRepository.existsByCredentials_Username(credentials.getUsername())) {
