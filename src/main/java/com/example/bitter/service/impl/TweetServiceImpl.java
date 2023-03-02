@@ -135,6 +135,7 @@ public class TweetServiceImpl implements TweetService {
         sourceTweet.setInReplyTo(targetTweet);
         tweetRepository.saveAndFlush(sourceTweet);
         tweetRepository.saveAndFlush(targetTweet);
+        
         return tweetMapper.entityToDto(sourceTweet);
     }
 
@@ -258,6 +259,7 @@ public class TweetServiceImpl implements TweetService {
         }
 
         ContextDto contextDto = new ContextDto();
+        contextDto.setTarget(tweet);
         contextDto.setBefore(before);
         contextDto.setAfter(after);
         return contextDto;

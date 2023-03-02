@@ -69,7 +69,7 @@ public class TweetController {
     // TODO: Shawn
     @PostMapping("/{id}/reply")
     @ResponseStatus(HttpStatus.CREATED)
-    public TweetResponseDto replyTweet(@PathVariable Long id, TweetRequestDto tweetRequestDto) {
+    public TweetResponseDto replyTweet(@PathVariable Long id, @RequestBody TweetRequestDto tweetRequestDto) {
         return tweetService.replyTweet(id, tweetRequestDto);
     }
     // GET tweets/{id}/replies
