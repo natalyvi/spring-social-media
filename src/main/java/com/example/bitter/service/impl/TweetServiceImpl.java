@@ -13,12 +13,9 @@ import com.example.bitter.mapper.UserMapper;
 import com.example.bitter.repository.TweetRepository;
 import com.example.bitter.repository.UserRepository;
 import com.example.bitter.service.TweetService;
-import com.example.bitter.service.ValidateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,7 +50,7 @@ public class TweetServiceImpl implements TweetService {
         return tweetMapper.entityToDto(getTweetIfExists(id));
     }
 
-    public Tweet parseAndUpdateMentions(Tweet tweet) {
+    public Tweet parseAndAddMentions(Tweet tweet) {
         Pattern pattern = Pattern.compile("^(@[a-zA-Z0-9_]{1,}[\\s\\S])*$");
         Set<User> mentions = new HashSet<>();
         Matcher matcher = pattern.matcher(tweet.getContent());
@@ -61,7 +58,7 @@ public class TweetServiceImpl implements TweetService {
         // parse usernames
         while (matcher.find()) {
             String username = matcher.group().substring(1);
-            mentions.add(userMapper.responseToEntity(userService.getUserByUsername(username).getBody()));
+            mentions.add(userMapper.responseToEntity(userService.getUserByUsername(username)));
         }
         // update tweet mentions for each user
         for (User user : mentions) {
@@ -71,7 +68,7 @@ public class TweetServiceImpl implements TweetService {
             userRepository.saveAndFlush(user);
         }
         // update tweet
-        Set<User> u = tweet.getMentioned();
+        Set<User> u = new HashSet<>();
         u.addAll(mentions);
         tweet.setMentioned(u);
 
@@ -85,7 +82,7 @@ public class TweetServiceImpl implements TweetService {
     public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
         // check if user exists
         User user;
-        user = userMapper.responseToEntity(userService.getUserByUsername(tweetRequestDto.getCredentials().getUsername()).getBody());
+        user = userMapper.responseToEntity(userService.getUserByUsername(tweetRequestDto.getCredentials().getUsername()));
         if (user == null) throw new BadRequestException("Invalid credentials");
 
         Tweet tweet = tweetMapper.dtoToEntity(tweetRequestDto);
@@ -94,9 +91,9 @@ public class TweetServiceImpl implements TweetService {
         tweet.setAuthor(user);
 
         // TODO: parse hashtags and mentions
-        Tweet updatedTweet = parseAndUpdateMentions(tweet);
+        Tweet updatedTweet = parseAndAddMentions(tweet);
 
-        return tweetMapper.entityToDto(tweetRepository.saveAndFlush(tweet));
+        return tweetMapper.entityToDto(tweetRepository.saveAndFlush(updatedTweet));
     }
 
     // Throw error is the tweet is deleted or doesn't exist, or if the credentials don't match an active user in the DB
@@ -105,7 +102,7 @@ public class TweetServiceImpl implements TweetService {
     public void likeTweet(Long id, CredentialsDto credentialsDto) {
         Tweet tweet = getTweetIfExists(id);
         User user;
-        user = userMapper.responseToEntity(userService.getUserByUsername(credentialsDto.getUsername()).getBody());
+        user = userMapper.responseToEntity(userService.getUserByUsername(credentialsDto.getUsername()));
         if (user == null) throw new BadRequestException("Invalid credentials");
 
         Set<User> u = tweet.getLikedBy();
