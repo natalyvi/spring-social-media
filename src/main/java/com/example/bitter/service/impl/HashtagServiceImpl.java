@@ -43,6 +43,7 @@ public class HashtagServiceImpl implements HashtagService{
     
     @Override
     public List<TweetResponseDto> getAllTweetsWithTag(String label) {
+        getTagByLabel(label); // check if exists
         return tweetService.getAllTweetsWithTag(label);
     }
     @Override
