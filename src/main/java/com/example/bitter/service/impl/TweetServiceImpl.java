@@ -5,6 +5,7 @@ import com.example.bitter.dto.TweetRequestDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserResponseDto;
 import com.example.bitter.entity.Credentials;
+import com.example.bitter.entity.Hashtag;
 import com.example.bitter.entity.Tweet;
 import com.example.bitter.entity.User;
 import com.example.bitter.exception.BadRequestException;
@@ -12,12 +13,16 @@ import com.example.bitter.exception.NotFoundException;
 import com.example.bitter.mapper.CredentialsMapper;
 import com.example.bitter.mapper.TweetMapper;
 import com.example.bitter.mapper.UserMapper;
+import com.example.bitter.repository.HashtagRepository;
 import com.example.bitter.repository.TweetRepository;
 import com.example.bitter.repository.UserRepository;
+import com.example.bitter.service.HashtagService;
 import com.example.bitter.service.TweetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,7 +36,8 @@ public class TweetServiceImpl implements TweetService {
     private final UserServiceImpl userService;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
-    private final CredentialsMapper credentialsMapper;
+    private final HashtagService hashtagService;
+    private final HashtagRepository hashtagRepository;
 
     public Tweet getTweetIfExists(Long id) {
         Optional<Tweet> tweet = tweetRepository.findById(id);
@@ -69,10 +75,40 @@ public class TweetServiceImpl implements TweetService {
             userRepository.saveAndFlush(user);
         }
         // update tweet
-        Set<User> u = new HashSet<>();
-        u.addAll(mentions);
+        Set<User> u = new HashSet<>(mentions);
         tweet.setMentioned(u);
+        return tweetRepository.saveAndFlush(tweet);
+    }
 
+    public Tweet parseAndAddHashtags(Tweet tweet) {
+        Pattern pattern = Pattern.compile("/(#+[a-zA-Z0-9(_)]{1,})/");
+        Set<Hashtag> tags = new HashSet<>();
+        Matcher matcher = pattern.matcher(tweet.getContent());
+
+        // parse hashtags
+        while (matcher.find()) {
+            String label = matcher.group().substring(1);
+            Optional<Hashtag> optionalTag = hashtagRepository.findByLabel(label);
+            Hashtag tag;
+            // update existing tags or create a new tag
+            if (optionalTag.isPresent()) {
+                tag = optionalTag.get();
+            } else {
+                tag = new Hashtag();
+                tag.setLabel(label);
+                tag.setFirstUsed(Timestamp.valueOf(LocalDateTime.now()));
+            }
+            tag.setLastUsed(Timestamp.valueOf(LocalDateTime.now()));
+            List<Tweet> t = tag.getTweets();
+            t.add(tweet);
+            tag.setTweets(t);
+            tags.add(tag);
+        }
+        for (Hashtag h : tags) System.out.println(h.getLabel());
+
+
+        hashtagRepository.saveAllAndFlush(tags);
+        tweet.setHashtags(tags);
         return tweetRepository.saveAndFlush(tweet);
     }
 
@@ -92,10 +128,10 @@ public class TweetServiceImpl implements TweetService {
 
         tweet.setAuthor(userRepository.findUserByCredentials_Username(tweetRequestDto.getCredentials().getUsername()));
 
-        // TODO: parse hashtags and mentions
-        Tweet updatedTweet = parseAndAddMentions(tweet);
+        Tweet updateTweetWithMentions = parseAndAddMentions(tweet);
+        Tweet updateTweetWithHashtags = parseAndAddHashtags(updateTweetWithMentions);
 
-        return tweetMapper.entityToDto(tweetRepository.saveAndFlush(updatedTweet));
+        return tweetMapper.entityToDto(updateTweetWithHashtags);
     }
 
     // Throw error is the tweet is deleted or doesn't exist, or if the credentials don't match an active user in the DB
