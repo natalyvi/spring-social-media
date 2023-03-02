@@ -8,6 +8,8 @@ import com.example.bitter.entity.Tweet;
 
 public interface HashtagService {
 
+    HashtagDto getTagByLabel(String label);
+
     List<HashtagDto> getAllTags();
 
     List<TweetResponseDto> getAllTweetsWithTag(String label);

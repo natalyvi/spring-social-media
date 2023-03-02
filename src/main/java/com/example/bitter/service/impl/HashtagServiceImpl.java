@@ -16,6 +16,7 @@ import com.example.bitter.dto.HashtagDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.entity.Hashtag;
 import com.example.bitter.entity.Tweet;
+import com.example.bitter.exception.NotFoundException;
 import com.example.bitter.mapper.HashtagMapper;
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,16 @@ public class HashtagServiceImpl implements HashtagService{
     public List<HashtagDto> getAllTags() {
         return hashtagMapper.entitiesToDto(hashtagRepository.findAll());
     }
+
+    @Override
+    public HashtagDto getTagByLabel(String label) {
+        Optional<Hashtag> tag = hashtagRepository.findByLabel(label);
+        if (tag.isEmpty()) {
+            throw new NotFoundException("Hashtag does not exist");
+        }
+        return hashtagMapper.entityToDto(tag.get());
+    }
+    
     @Override
     public List<TweetResponseDto> getAllTweetsWithTag(String label) {
         // TODO: Will need methods from TweetService

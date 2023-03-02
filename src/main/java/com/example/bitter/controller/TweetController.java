@@ -74,7 +74,7 @@ public class TweetController {
     @PostMapping("/{id}/repost")
     @ResponseStatus(HttpStatus.CREATED)
     public TweetResponseDto repostTweet(@PathVariable Long id, @RequestBody CredentialsDto credentialsDto) {
-        return tweetService.repostTweet(id);
+        return tweetService.repostTweet(id, credentialsDto);
     }
 
     // GET tweets/{id}/reposts
