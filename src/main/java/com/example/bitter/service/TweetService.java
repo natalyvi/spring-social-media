@@ -29,4 +29,12 @@ public interface TweetService {
     List<TweetResponseDto> getRepostsOfTweet(Long id);
 
     TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto);
+
+    List<TweetResponseDto> getAllTweetsWithTag(String label);
+   
+    List<HashtagDto> getTagsByTweetId(Long id);
+
+    ContextDto getContextByTweetId(Long id);
+
+    TweetResponseDto replyTweet(Long id, TweetRequestDto tweetRequestDto);
 }
