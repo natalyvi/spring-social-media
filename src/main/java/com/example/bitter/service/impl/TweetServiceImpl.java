@@ -161,6 +161,6 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public List<TweetResponseDto> getAllTweetsWithTag(String label) {
-        return tweetMapper.entitiesToDtos(tweetRepository.findByDeletedFalseHashtags_LabelOrderByPosted(label));
+        return tweetMapper.entitiesToDtos(tweetRepository.findByDeletedFalseAndHashtags_LabelOrderByPosted(label));
     }
 }

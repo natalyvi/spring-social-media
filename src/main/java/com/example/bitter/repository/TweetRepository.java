@@ -10,5 +10,5 @@ import java.util.List;
 public interface TweetRepository extends JpaRepository<Tweet, Long> {
     List<Tweet> findByDeletedFalseOrderByPosted();
 
-    List<Tweet> findByDeletedFalseHashtags_LabelOrderByPosted(String label);
+    List<Tweet> findByDeletedFalseAndHashtags_LabelOrderByPosted(String label);
 }
