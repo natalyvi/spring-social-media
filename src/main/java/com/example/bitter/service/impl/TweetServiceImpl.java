@@ -18,7 +18,6 @@ import com.example.bitter.mapper.UserMapper;
 import com.example.bitter.repository.HashtagRepository;
 import com.example.bitter.repository.TweetRepository;
 import com.example.bitter.repository.UserRepository;
-import com.example.bitter.service.HashtagService;
 import com.example.bitter.service.TweetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,7 +37,6 @@ public class TweetServiceImpl implements TweetService {
     private final UserServiceImpl userService;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
-    private final HashtagService hashtagService;
     private final HashtagRepository hashtagRepository;
 
     public Tweet getTweetIfExists(Long id) {
@@ -202,11 +200,6 @@ public class TweetServiceImpl implements TweetService {
         Tweet tweet = getTweetIfExists(id);
         tweet.setDeleted(true);
         return tweetMapper.entityToDto(tweetRepository.saveAndFlush(tweet));
-    }
-
-    @Override
-    public List<TweetResponseDto> getAllTweetsWithTag(String label) {
-        return tweetMapper.entitiesToDtos(tweetRepository.findByDeletedFalseAndHashtags_LabelOrderByPosted(label));
     }
 
     @Override
