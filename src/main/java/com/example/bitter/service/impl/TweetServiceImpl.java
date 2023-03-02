@@ -80,15 +80,16 @@ public class TweetServiceImpl implements TweetService {
     // Must parse @usernames and #hashtags
     @Override
     public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
+        if (tweetRequestDto.getCredentials() == null) throw new BadRequestException("No credentials provided");
         // check if user exists
         User user;
-        user = userMapper.responseToEntity(userService.getUserByUsername(tweetRequestDto.getCredentials().getUsername()));
+        user = userRepository.findUserByCredentials_Username(tweetRequestDto.getCredentials().getUsername());
         if (user == null) throw new BadRequestException("Invalid credentials");
 
         Tweet tweet = tweetMapper.dtoToEntity(tweetRequestDto);
         if (tweet.getContent() == null) throw new BadRequestException("New tweet must contain content");
 
-        tweet.setAuthor(user);
+        tweet.setAuthor(userRepository.findUserByCredentials_Username(tweetRequestDto.getCredentials().getUsername()));
 
         // TODO: parse hashtags and mentions
         Tweet updatedTweet = parseAndAddMentions(tweet);
@@ -100,6 +101,7 @@ public class TweetServiceImpl implements TweetService {
     // On successful operation, return no response body
     @Override
     public void likeTweet(Long id, CredentialsDto credentialsDto) {
+        if (credentialsDto == null) throw new BadRequestException("No credentials provided");
         Tweet tweet = getTweetIfExists(id);
         User user;
         user = userMapper.responseToEntity(userService.getUserByUsername(credentialsDto.getUsername()));
