@@ -1,6 +1,8 @@
 package com.example.bitter.service.impl;
 
+import com.example.bitter.dto.ContextDto;
 import com.example.bitter.dto.CredentialsDto;
+import com.example.bitter.dto.HashtagDto;
 import com.example.bitter.dto.TweetRequestDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserResponseDto;
@@ -9,6 +11,9 @@ import com.example.bitter.entity.Tweet;
 import com.example.bitter.entity.User;
 import com.example.bitter.exception.BadRequestException;
 import com.example.bitter.exception.NotFoundException;
+import com.example.bitter.mapper.CredentialsMapper;
+import com.example.bitter.mapper.HashtagMapper;
+
 import com.example.bitter.mapper.TweetMapper;
 import com.example.bitter.mapper.UserMapper;
 import com.example.bitter.repository.HashtagRepository;
@@ -32,6 +37,7 @@ public class TweetServiceImpl implements TweetService {
     private final TweetMapper tweetMapper;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
+    private final HashtagMapper hashtagMapper;
     private final HashtagRepository hashtagRepository;
 
     public Tweet getTweetIfExists(Long id) {
@@ -116,6 +122,22 @@ public class TweetServiceImpl implements TweetService {
     // Must parse @usernames and #hashtags
     @Override
     public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
+        return tweetMapper.entityToDto(createTweetEntity(tweetRequestDto));
+    }
+
+    @Override
+    public TweetResponseDto replyTweet(Long id, TweetRequestDto tweetRequestDto) {
+        Tweet targetTweet = getTweetIfExists(id);
+        Tweet sourceTweet = createTweetEntity(tweetRequestDto);
+        targetTweet.getReplies().add(sourceTweet);
+        sourceTweet.setInReplyTo(targetTweet);
+        tweetRepository.saveAndFlush(sourceTweet);
+        tweetRepository.saveAndFlush(targetTweet);
+        return tweetMapper.entityToDto(sourceTweet);
+    }
+
+    private Tweet createTweetEntity(TweetRequestDto tweetRequestDto) {
+        if (tweetRequestDto.getCredentials() == null) throw new BadRequestException("No credentials provided");
         validateCredentials(tweetRequestDto.getCredentials());
         // check if user exists
         User user;
@@ -130,7 +152,7 @@ public class TweetServiceImpl implements TweetService {
         Tweet updatedTweetWithMentions = parseAndAddMentions(tweet);
         Tweet updatedTweetWithHashtags = parseAndAddHashtags(updatedTweetWithMentions);
 
-        return tweetMapper.entityToDto(updatedTweetWithHashtags);
+        return updatedTweetWithHashtags;
     }
 
     // Throw error is the tweet is deleted or doesn't exist, or if the credentials don't match an active user in the DB
@@ -211,7 +233,15 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public List<TweetResponseDto> getAllTweetsWithTag(String label) {
-        return tweetMapper.entitiesToDtos(tweetRepository.findByDeletedFalseAndHashtags_LabelOrderByPosted(label));
+    public List<HashtagDto> getTagsByTweetId(Long id) {
+        return hashtagMapper.entitiesToDto(hashtagRepository.findByTweets_Id(id));
     }
+
+    @Override
+    public ContextDto getContextByTweetId(Long id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getContextByTweetId'");
+    }
+
+    
 }
