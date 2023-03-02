@@ -97,4 +97,13 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToDto(userToUpdate);
     }
 
+    @Override
+    public List<UserResponseDto> getUsersFollowedByUsername(String username) {
+        User userByUsername = userRepository.findUserByCredentials_Username(username);
+        List<User> usersFollowedByUsername = userRepository.findAllByFollowersContaining(userByUsername);
+
+        return userMapper.entitiesToDtos(usersFollowedByUsername);
+
+    }
+
 }

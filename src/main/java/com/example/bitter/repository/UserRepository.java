@@ -18,4 +18,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Boolean existsByCredentials(Credentials credentials);
 
+    List<User> findAllByFollowersContaining(User user);
+
 }

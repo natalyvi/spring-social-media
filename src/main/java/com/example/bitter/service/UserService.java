@@ -16,4 +16,6 @@ public interface UserService {
 
     UserResponseDto updateUserProfileByUsername(String username, UserRequestDto userRequestDto);
 
+    List<UserResponseDto> getUsersFollowedByUsername(String username);
+
 }
