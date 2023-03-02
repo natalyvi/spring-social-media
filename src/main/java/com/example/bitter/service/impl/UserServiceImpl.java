@@ -1,11 +1,14 @@
 package com.example.bitter.service.impl;
 
+import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserRequestDto;
 import com.example.bitter.dto.UserResponseDto;
+import com.example.bitter.entity.Tweet;
 import com.example.bitter.entity.User;
 import com.example.bitter.exception.BadRequestException;
 import com.example.bitter.exception.NotAuthorizedException;
 import com.example.bitter.exception.NotFoundException;
+import com.example.bitter.mapper.TweetMapper;
 import com.example.bitter.mapper.UserMapper;
 import com.example.bitter.repository.UserRepository;
 import com.example.bitter.service.UserService;
@@ -21,6 +24,8 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     private final UserRepository userRepository;
+
+    private final TweetMapper tweetMapper;
 
     @Override
     public List<UserResponseDto> getAllUsers() {
@@ -113,17 +118,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> getUsersFollowedByUsername(String username) {
-        if (!userRepository.existsByCredentials_Username(username)) {
-            throw new NotFoundException("The provided username doesn't exist.");
-        }
-        if (userRepository.findUserByCredentials_Username(username).isDeleted()) {
-            throw new BadRequestException("The provided username is deleted.");
-        }
+    public List<TweetResponseDto> getTweets(String username) {
         User userByUsername = userRepository.findUserByCredentials_Username(username);
-        List<User> usersFollowedByUsername = userRepository.findAllByFollowersContaining(userByUsername);
+        List<Tweet> tweets = userByUsername.getTweets();
 
-        return userMapper.entitiesToDtos(usersFollowedByUsername);
+        return tweetMapper.entitiesToDtos(tweets);
     }
+
+//    // TODO: Test again after the users/@[username}/follow is done
+//    @Override
+//    public List<UserResponseDto> getFollowersOfTheUser(String username) {
+//        User userByUsername = userRepository.findUserByCredentials_Username(username);
+//        List<User> followers = userByUsername.getFollowers();
+//
+//        return userMapper.entitiesToDtos(followers);
+//    }
+
+//    @Override
+//    public List<UserResponseDto> getUsersFollowedByUsername(String username) {
+//        if (!userRepository.existsByCredentials_Username(username)) {
+//            throw new NotFoundException("The provided username doesn't exist.");
+//        }
+//        if (userRepository.findUserByCredentials_Username(username).isDeleted()) {
+//            throw new BadRequestException("The provided username is deleted.");
+//        }
+//        User userByUsername = userRepository.findUserByCredentials_Username(username);
+//        List<User> usersFollowedByUsername = userRepository.findUsersByFollowersContaining(userByUsername);
+//
+//        return userMapper.entitiesToDtos(usersFollowedByUsername);
+//    }
 
 }

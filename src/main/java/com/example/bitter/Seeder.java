@@ -25,7 +25,8 @@ public class Seeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-/*// --- User 1 ---
+/*
+// --- User 1 ---
 //        Credentials
         Credentials user1Cred = new Credentials();
         user1Cred.setUsername("therealmc");
@@ -242,11 +243,11 @@ public class Seeder implements CommandLineRunner {
 
         // ----- List of Following -----
         List<User> followingList = List.of(user2, user3, user4);
-        user1.setFollowing(Set.copyOf(followingList));
+        user1.setFollowing(followingList);
         userRepository.saveAndFlush(user1);
         // ----- List of Followers -----
         List<User> followersList = List.of(user3, user5);
-        user2.setFollowers(Set.copyOf(followersList));
+        user2.setFollowers(followersList);
         userRepository.saveAndFlush(user2);
 
         // ----- Tweet Mentions -----
@@ -259,10 +260,11 @@ public class Seeder implements CommandLineRunner {
 
         // Following
         List<User> following_1 = List.of(user2, user3, user4, deletedUser);
-        user1.setFollowing(Set.copyOf(following_1));
+        user1.setFollowing(following_1);
 
         List<User> followers_1 = List.of(user5, deletedUser);
-        user1.setFollowers(Set.copyOf(followers_1));
-        userRepository.saveAndFlush(user1);*/
+        user1.setFollowers(followers_1);
+        userRepository.saveAndFlush(user1);
+*/
     }
 }
