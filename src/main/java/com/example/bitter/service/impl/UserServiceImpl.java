@@ -208,6 +208,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDto> getFollowersOfTheUser(String username) {
+        if (!userRepository.existsByCredentials_Username(username) || userRepository.findUserByCredentials_Username(username).isDeleted()) {
+            throw new NotFoundException("The provided username doesn't exist.");
+        }
         User userByUsername = userRepository.findUserByCredentials_Username(username);
         List<User> followers = userByUsername.getFollowers();
 
@@ -216,11 +219,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDto> getUsersFollowedByUsername(String username) {
-        if (!userRepository.existsByCredentials_Username(username)) {
+        if (!userRepository.existsByCredentials_Username(username) || userRepository.findUserByCredentials_Username(username).isDeleted()) {
             throw new NotFoundException("The provided username doesn't exist.");
-        }
-        if (userRepository.findUserByCredentials_Username(username).isDeleted()) {
-            throw new BadRequestException("The provided username is deleted.");
         }
         User userByUsername = userRepository.findUserByCredentials_Username(username);
         List<User> usersFollowedByUsername = userByUsername.getFollowing();
