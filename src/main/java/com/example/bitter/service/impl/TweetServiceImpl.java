@@ -43,7 +43,7 @@ public class TweetServiceImpl implements TweetService {
     public void validateCredentials(CredentialsDto credentialsDto) {
         if (credentialsDto == null
                 || credentialsDto.getUsername() == null
-                || credentialsDto.getPassword() == null) throw new BadRequestException("Invalid credentials");
+                || credentialsDto.getPassword() == null) throw new BadRequestException("Incomplete credentials");
     }
 
     // Must be in reverse-chronological order
