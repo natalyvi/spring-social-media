@@ -1,5 +1,6 @@
 package com.example.bitter.service;
 
+import com.example.bitter.dto.CredentialsDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserRequestDto;
 import com.example.bitter.dto.UserResponseDto;
@@ -22,4 +23,9 @@ public interface UserService {
 //    List<UserResponseDto> getFollowersOfTheUser (String username);
 
     List<TweetResponseDto> getTweets(String username);
+
+    void follow(String username, CredentialsDto credentials);
+
+    void unfollow(String username, CredentialsDto credentials);
+
 }
