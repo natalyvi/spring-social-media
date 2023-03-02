@@ -1,5 +1,6 @@
 package com.example.bitter.controller;
 
+import com.example.bitter.dto.CredentialsDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserRequestDto;
 import com.example.bitter.dto.UserResponseDto;
@@ -54,6 +55,16 @@ public class UserController {
     @GetMapping("/@{username}/tweets")
     public List<TweetResponseDto> getTweets(@PathVariable String username){
         return userService.getTweets(username);
+    }
+
+    @PostMapping("/@{username}/follow")
+    public void followUser(@PathVariable String username, @RequestBody CredentialsDto credentials) {
+        userService.follow(username, credentials);
+    }
+
+    @PostMapping("/@{username}/unfollow")
+    public void unfollowUser(@PathVariable String username, @RequestBody CredentialsDto credentials) {
+        userService.unfollow(username, credentials);
     }
 
 }
