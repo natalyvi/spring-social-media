@@ -4,19 +4,16 @@ import com.example.bitter.dto.CredentialsDto;
 import com.example.bitter.dto.TweetRequestDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserResponseDto;
-import com.example.bitter.entity.Credentials;
 import com.example.bitter.entity.Hashtag;
 import com.example.bitter.entity.Tweet;
 import com.example.bitter.entity.User;
 import com.example.bitter.exception.BadRequestException;
 import com.example.bitter.exception.NotFoundException;
-import com.example.bitter.mapper.CredentialsMapper;
 import com.example.bitter.mapper.TweetMapper;
 import com.example.bitter.mapper.UserMapper;
 import com.example.bitter.repository.HashtagRepository;
 import com.example.bitter.repository.TweetRepository;
 import com.example.bitter.repository.UserRepository;
-import com.example.bitter.service.HashtagService;
 import com.example.bitter.service.TweetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,10 +30,8 @@ public class TweetServiceImpl implements TweetService {
 
     private final TweetRepository tweetRepository;
     private final TweetMapper tweetMapper;
-    private final UserServiceImpl userService;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
-    private final HashtagService hashtagService;
     private final HashtagRepository hashtagRepository;
 
     public Tweet getTweetIfExists(Long id) {
@@ -139,7 +134,7 @@ public class TweetServiceImpl implements TweetService {
         if (credentialsDto == null) throw new BadRequestException("No credentials provided");
         Tweet tweet = getTweetIfExists(id);
         User user;
-        user = userMapper.responseToEntity(userService.getUserByUsername(credentialsDto.getUsername()));
+        user = userRepository.findUserByCredentials_Username(credentialsDto.getUsername());
         if (user == null) throw new BadRequestException("Invalid credentials");
 
         Set<User> u = tweet.getLikedBy();
