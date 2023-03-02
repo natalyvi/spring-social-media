@@ -95,6 +95,8 @@ public class TweetController {
     // TODO: Shawn
     @GetMapping("/{id}/context")
     public ContextDto getContextByTweet(@PathVariable Long id) {
+        System.out.println("Getting context by id");
+        System.out.println();
         return tweetService.getContextByTweetId(id);
     }
 

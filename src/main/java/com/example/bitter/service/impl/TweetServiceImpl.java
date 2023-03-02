@@ -243,14 +243,15 @@ public class TweetServiceImpl implements TweetService {
     @Override
     public ContextDto getContextByTweetId(Long id) {
         Tweet tweet = getTweetIfExists(id);
-        Tweet previousTweet = tweet;
+        Tweet previousTweet = tweet.getInReplyTo();
         List<TweetResponseDto> before = new ArrayList<>();
-        while (previousTweet.getInReplyTo() != null) {
-            if (!previousTweet.getInReplyTo().isDeleted()) {
+        while (previousTweet != null) {
+            if (!previousTweet.isDeleted()) {
                 before.add(tweetMapper.entityToDto(previousTweet));
             }
             previousTweet = previousTweet.getInReplyTo();
         }
+
         List<TweetResponseDto> after = new ArrayList<>();
         for (Tweet t : tweet.getReplies()) {
             if (!t.isDeleted()) {
@@ -259,7 +260,7 @@ public class TweetServiceImpl implements TweetService {
         }
 
         ContextDto contextDto = new ContextDto();
-        contextDto.setTarget(tweet);
+        contextDto.setTarget(tweetMapper.entityToDto(tweet));
         contextDto.setBefore(before);
         contextDto.setAfter(after);
         return contextDto;
