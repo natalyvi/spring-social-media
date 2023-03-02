@@ -1,5 +1,6 @@
 package com.example.bitter.service.impl;
 
+import com.example.bitter.dto.CredentialsDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserRequestDto;
 import com.example.bitter.dto.UserResponseDto;
@@ -132,6 +133,51 @@ public class UserServiceImpl implements UserService {
         List<Tweet> tweets = userByUsername.getTweets();
         tweets.removeIf(Tweet::isDeleted);
         return tweetMapper.entitiesToDtos(tweets);
+    }
+
+    @Override
+    public void follow(String username, CredentialsDto credentials) {
+        verifyUsers(username, credentials);
+        User sourceUser = userRepository.findUserByCredentials_Username(credentials.getUsername());
+        User targetUser = userRepository.findUserByCredentials_Username(username);
+
+        if (targetUser.getFollowers().contains(sourceUser) || sourceUser.getFollowing().contains(targetUser)) {
+            throw new BadRequestException("Already following");
+        }
+
+        sourceUser.getFollowing().add(targetUser);
+        targetUser.getFollowers().add(sourceUser);
+
+        userRepository.saveAndFlush(sourceUser);
+        userRepository.saveAndFlush(targetUser);
+    }
+
+    @Override
+    public void unfollow(String username, CredentialsDto credentials) {
+        verifyUsers(username, credentials);
+        User sourceUser = userRepository.findUserByCredentials_Username(credentials.getUsername());
+        User targetUser = userRepository.findUserByCredentials_Username(username);
+        if (!targetUser.getFollowers().contains(sourceUser) || !sourceUser.getFollowing().contains(targetUser)) {
+            throw new BadRequestException("Not following");
+        }
+
+        sourceUser.getFollowing().remove(targetUser);
+        targetUser.getFollowers().remove(sourceUser);
+
+        userRepository.saveAndFlush(sourceUser);
+        userRepository.saveAndFlush(targetUser);
+    }
+
+    private void verifyUsers(String username, CredentialsDto credentials) {
+        if (credentials == null) {
+            throw new BadRequestException("Credentials can't be null.");
+        }
+        if (!userRepository.existsByCredentials_Username(credentials.getUsername())) {
+            throw new NotFoundException("The provided source username doesn't exist.");
+        }
+        if (!userRepository.existsByCredentials_Username(username)) {
+            throw new NotFoundException("The provided target username doesn't exist.");
+        }
     }
 
 //    // TODO: Test again after the users/@[username}/follow is done
