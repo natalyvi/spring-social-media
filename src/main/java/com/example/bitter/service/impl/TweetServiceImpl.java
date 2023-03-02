@@ -110,7 +110,9 @@ public class TweetServiceImpl implements TweetService {
     // Must parse @usernames and #hashtags
     @Override
     public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
-        if (tweetRequestDto.getCredentials() == null) throw new BadRequestException("No credentials provided");
+        if (tweetRequestDto.getCredentials() == null
+                || tweetRequestDto.getCredentials().getUsername() == null
+                || tweetRequestDto.getCredentials().getPassword() == null) throw new BadRequestException("No credentials provided");
         // check if user exists
         User user;
         user = userRepository.findUserByCredentials_Username(tweetRequestDto.getCredentials().getUsername());
