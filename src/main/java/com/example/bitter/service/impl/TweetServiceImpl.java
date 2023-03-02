@@ -1,6 +1,8 @@
 package com.example.bitter.service.impl;
 
+import com.example.bitter.dto.ContextDto;
 import com.example.bitter.dto.CredentialsDto;
+import com.example.bitter.dto.HashtagDto;
 import com.example.bitter.dto.TweetRequestDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserResponseDto;
@@ -9,12 +11,17 @@ import com.example.bitter.entity.Tweet;
 import com.example.bitter.entity.User;
 import com.example.bitter.exception.BadRequestException;
 import com.example.bitter.exception.NotFoundException;
+import com.example.bitter.mapper.CredentialsMapper;
+import com.example.bitter.mapper.HashtagMapper;
+
 import com.example.bitter.mapper.TweetMapper;
 import com.example.bitter.mapper.UserMapper;
 import com.example.bitter.repository.HashtagRepository;
 import com.example.bitter.repository.TweetRepository;
 import com.example.bitter.repository.UserRepository;
 import com.example.bitter.service.TweetService;
+
+import ch.qos.logback.core.Context;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +39,19 @@ public class TweetServiceImpl implements TweetService {
     private final TweetMapper tweetMapper;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
+    private final HashtagMapper hashtagMapper;
     private final HashtagRepository hashtagRepository;
 
     public Tweet getTweetIfExists(Long id) {
         Optional<Tweet> tweet = tweetRepository.findById(id);
         if (tweet.isEmpty() || tweet.get().isDeleted()) throw new NotFoundException("Tweet " + id + " not found");
         return tweet.get();
+    }
+
+    public void validateCredentials(CredentialsDto credentialsDto) {
+        if (credentialsDto == null
+                || credentialsDto.getUsername() == null
+                || credentialsDto.getPassword() == null) throw new BadRequestException("Incomplete credentials");
     }
 
     // Must be in reverse-chronological order
@@ -91,7 +105,7 @@ public class TweetServiceImpl implements TweetService {
                 tag = new Hashtag();
                 tag.setLabel(label);
                 tag.setFirstUsed(Timestamp.valueOf(LocalDateTime.now()));
-                tag.setTweets(new ArrayList<Tweet>());
+                tag.setTweets(new ArrayList<>());
             }
             tag.setLastUsed(Timestamp.valueOf(LocalDateTime.now()));
             List<Tweet> t = tag.getTweets();
@@ -110,9 +124,24 @@ public class TweetServiceImpl implements TweetService {
     // Must parse @usernames and #hashtags
     @Override
     public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
-        if (tweetRequestDto.getCredentials() == null
-                || tweetRequestDto.getCredentials().getUsername() == null
-                || tweetRequestDto.getCredentials().getPassword() == null) throw new BadRequestException("No credentials provided");
+        return tweetMapper.entityToDto(createTweetEntity(tweetRequestDto));
+    }
+
+    @Override
+    public TweetResponseDto replyTweet(Long id, TweetRequestDto tweetRequestDto) {
+        Tweet targetTweet = getTweetIfExists(id);
+        Tweet sourceTweet = createTweetEntity(tweetRequestDto);
+        targetTweet.getReplies().add(sourceTweet);
+        sourceTweet.setInReplyTo(targetTweet);
+        tweetRepository.saveAndFlush(sourceTweet);
+        tweetRepository.saveAndFlush(targetTweet);
+        
+        return tweetMapper.entityToDto(sourceTweet);
+    }
+
+    private Tweet createTweetEntity(TweetRequestDto tweetRequestDto) {
+        if (tweetRequestDto.getCredentials() == null) throw new BadRequestException("No credentials provided");
+        validateCredentials(tweetRequestDto.getCredentials());
         // check if user exists
         User user;
         user = userRepository.findUserByCredentials_Username(tweetRequestDto.getCredentials().getUsername());
@@ -126,17 +155,21 @@ public class TweetServiceImpl implements TweetService {
         Tweet updatedTweetWithMentions = parseAndAddMentions(tweet);
         Tweet updatedTweetWithHashtags = parseAndAddHashtags(updatedTweetWithMentions);
 
-        return tweetMapper.entityToDto(updatedTweetWithHashtags);
+        return updatedTweetWithHashtags;
     }
 
     // Throw error is the tweet is deleted or doesn't exist, or if the credentials don't match an active user in the DB
     // On successful operation, return no response body
     @Override
     public void likeTweet(Long id, CredentialsDto credentialsDto) {
-        if (credentialsDto == null) throw new BadRequestException("No credentials provided");
+        validateCredentials(credentialsDto);
         Tweet tweet = getTweetIfExists(id);
         User user;
-        user = userRepository.findUserByCredentials_Username(credentialsDto.getUsername());
+        try {
+            user = userRepository.findUserByCredentials_Username(credentialsDto.getUsername());
+        } catch (NotFoundException e) {
+            throw e;
+        }
         if (user == null) throw new BadRequestException("Invalid credentials");
 
         Set<User> u = tweet.getLikedBy();
@@ -178,8 +211,7 @@ public class TweetServiceImpl implements TweetService {
     // No content, author of the repost should match the credentials provided in the request body
     @Override
     public TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto) {
-        if (credentialsDto == null) throw new BadRequestException("No credentials provided");
-
+        validateCredentials(credentialsDto);
         Tweet tweet = getTweetIfExists(id);
         Tweet newTweet = new Tweet();
         newTweet.setAuthor(userRepository.findUserByCredentials_Username(credentialsDto.getUsername()));
@@ -204,7 +236,35 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public List<TweetResponseDto> getAllTweetsWithTag(String label) {
-        return tweetMapper.entitiesToDtos(tweetRepository.findByDeletedFalseAndHashtags_LabelOrderByPosted(label));
+    public List<HashtagDto> getTagsByTweetId(Long id) {
+        return hashtagMapper.entitiesToDto(hashtagRepository.findByTweets_Id(id));
     }
+
+    @Override
+    public ContextDto getContextByTweetId(Long id) {
+        Tweet tweet = getTweetIfExists(id);
+        Tweet previousTweet = tweet.getInReplyTo();
+        List<TweetResponseDto> before = new ArrayList<>();
+        while (previousTweet != null) {
+            if (!previousTweet.isDeleted()) {
+                before.add(tweetMapper.entityToDto(previousTweet));
+            }
+            previousTweet = previousTweet.getInReplyTo();
+        }
+
+        List<TweetResponseDto> after = new ArrayList<>();
+        for (Tweet t : tweet.getReplies()) {
+            if (!t.isDeleted()) {
+                after.add(tweetMapper.entityToDto(t));
+            }
+        }
+
+        ContextDto contextDto = new ContextDto();
+        contextDto.setTarget(tweetMapper.entityToDto(tweet));
+        contextDto.setBefore(before);
+        contextDto.setAfter(after);
+        return contextDto;
+    }
+
+    
 }

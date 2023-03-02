@@ -20,4 +20,6 @@ public interface UserMapper {
 
     User responseToEntity(UserResponseDto userResponseDto);
 
+    List<User> responsesToEntities(List<UserResponseDto> userResponseDtos);
+
 }

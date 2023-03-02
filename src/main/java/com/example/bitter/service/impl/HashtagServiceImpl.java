@@ -13,19 +13,23 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.example.bitter.repository.HashtagRepository;
+import com.example.bitter.repository.TweetRepository;
 import com.example.bitter.dto.HashtagDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.entity.Hashtag;
 import com.example.bitter.entity.Tweet;
 import com.example.bitter.exception.NotFoundException;
 import com.example.bitter.mapper.HashtagMapper;
+import com.example.bitter.mapper.TweetMapper;
 @Service
 @RequiredArgsConstructor
 public class HashtagServiceImpl implements HashtagService{
     
     private final HashtagRepository hashtagRepository;
+    private final TweetRepository tweetRepository;
     private final HashtagMapper hashtagMapper;
-    private final TweetService tweetService;
+    private final TweetMapper tweetMapper;
+    
     
     @Override
     public List<HashtagDto> getAllTags() {
@@ -43,7 +47,8 @@ public class HashtagServiceImpl implements HashtagService{
     
     @Override
     public List<TweetResponseDto> getAllTweetsWithTag(String label) {
-        return tweetService.getAllTweetsWithTag(label);
+        getTagByLabel(label); // check if tag exists
+        return tweetMapper.entitiesToDtos(tweetRepository.findByDeletedFalseAndHashtags_LabelOrderByPosted(label));
     }
     @Override
     public HashtagDto updateTag(Tweet tweet, String label) {
