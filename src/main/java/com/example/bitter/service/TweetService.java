@@ -1,6 +1,8 @@
 package com.example.bitter.service;
 
+import com.example.bitter.dto.ContextDto;
 import com.example.bitter.dto.CredentialsDto;
+import com.example.bitter.dto.HashtagDto;
 import com.example.bitter.dto.TweetRequestDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserResponseDto;
@@ -27,4 +29,10 @@ public interface TweetService {
     List<TweetResponseDto> getRepostsOfTweet(Long id);
 
     TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto);
+
+    List<HashtagDto> getTagsByTweetId(Long id);
+
+    ContextDto getContextByTweetId(Long id);
+
+    TweetResponseDto replyTweet(Long id, TweetRequestDto tweetRequestDto);
 }

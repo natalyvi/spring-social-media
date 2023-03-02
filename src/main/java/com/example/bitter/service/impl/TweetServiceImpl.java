@@ -1,6 +1,8 @@
 package com.example.bitter.service.impl;
 
+import com.example.bitter.dto.ContextDto;
 import com.example.bitter.dto.CredentialsDto;
+import com.example.bitter.dto.HashtagDto;
 import com.example.bitter.dto.TweetRequestDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserResponseDto;
@@ -200,5 +202,23 @@ public class TweetServiceImpl implements TweetService {
         Tweet tweet = getTweetIfExists(id);
         tweet.setDeleted(true);
         return tweetMapper.entityToDto(tweetRepository.saveAndFlush(tweet));
+    }
+
+    @Override
+    public List<HashtagDto> getTagsByTweetId(Long id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getTagsByTweetId'");
+    }
+
+    @Override
+    public ContextDto getContextByTweetId(Long id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getContextByTweetId'");
+    }
+
+    @Override
+    public TweetResponseDto replyTweet(Long id, TweetRequestDto tweetRequestDto) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'replyTweet'");
     }
 }

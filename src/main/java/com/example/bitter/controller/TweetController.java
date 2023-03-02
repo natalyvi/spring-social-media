@@ -1,6 +1,7 @@
 package com.example.bitter.controller;
 
 import com.example.bitter.dto.CredentialsDto;
+import com.example.bitter.dto.HashtagDto;
 import com.example.bitter.dto.TweetRequestDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserResponseDto;
@@ -37,9 +38,11 @@ public class TweetController {
         return tweetService.getTweet(id);
     }
 
-
     // GET tweets/{id}/tags
-    // TODO: Shawn
+    @GetMapping("/{id}/tags")
+    public List<HashtagDto> getTagsByTweetId(@PathVariable Long id) {
+        return tweetService.getTagsByTweetId(id);
+    }
 
 
     // POST tweets/{id}/like
@@ -63,7 +66,10 @@ public class TweetController {
 
     // POST tweets/{id}/reply
     // TODO: Shawn
-
+    @PostMapping("/{id}/reply")
+    public TweetResponseDto replyTweet(@PathVariable Long id, TweetRequestDto tweetRequestDto) {
+        return tweetService.replyTweet(id, tweetRequestDto);
+    }
     // GET tweets/{id}/replies
     @GetMapping("/{id}/replies")
     public List<TweetResponseDto> getRepliesToTweet(@PathVariable Long id) {
