@@ -121,8 +121,8 @@ public class TweetServiceImpl implements TweetService {
         user = userRepository.findUserByCredentials_Username(tweetRequestDto.getCredentials().getUsername());
         if (user == null) throw new BadRequestException("Invalid credentials");
 
+        if (tweetRequestDto.getContent() == null) throw new BadRequestException("New tweet must contain content");
         Tweet tweet = tweetMapper.dtoToEntity(tweetRequestDto);
-        if (tweet.getContent() == null) throw new BadRequestException("New tweet must contain content");
 
         tweet.setAuthor(userRepository.findUserByCredentials_Username(tweetRequestDto.getCredentials().getUsername()));
 
@@ -172,7 +172,9 @@ public class TweetServiceImpl implements TweetService {
     @Override
     public List<TweetResponseDto> getRepliesToTweet(Long id) {
         Tweet tweet = getTweetIfExists(id);
-        return tweetMapper.entitiesToDtos(tweet.getReplies());
+        List<Tweet> replies = new ArrayList<>(tweet.getReplies());
+        replies.removeIf(Tweet::isDeleted);
+        return tweetMapper.entitiesToDtos(replies);
     }
 
     // Throw error is the tweet is deleted or doesn't exist, or if the credentials don't match an active user in the DB
@@ -192,7 +194,9 @@ public class TweetServiceImpl implements TweetService {
     @Override
     public List<TweetResponseDto> getRepostsOfTweet(Long id) {
         Tweet tweet = getTweetIfExists(id);
-        return tweetMapper.entitiesToDtos(tweet.getReposts());
+        List<Tweet> reposts = new ArrayList<>(tweet.getReposts());
+        reposts.removeIf(Tweet::isDeleted);
+        return tweetMapper.entitiesToDtos(reposts);
     }
 
     @Override
