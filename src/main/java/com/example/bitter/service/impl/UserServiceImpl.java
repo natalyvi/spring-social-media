@@ -128,8 +128,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<TweetResponseDto> getTweets(String username) {
-        User userByUsername = userRepository.findUserByCredentials_Username(username);
-        List<Tweet> tweets = userByUsername.getTweets();
+        User user;
+        try {
+            user = userRepository.findUserByCredentials_Username(username);
+        } catch (NotFoundException e) {
+            throw e;
+        }
+        if (user == null || user.isDeleted()) throw new NotFoundException("User " + username + " doesn't exist.");
+        List<Tweet> tweets = user.getTweets();
         tweets.removeIf(Tweet::isDeleted);
         return tweetMapper.entitiesToDtos(tweets);
     }
