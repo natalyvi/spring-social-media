@@ -218,6 +218,17 @@ public class UserServiceImpl implements UserService {
         return tweetMapper.entitiesToDtos(feed);
     }
 
+    @Override
+    public List<TweetResponseDto> getMentionsOfUser(String username) {
+        if (!userRepository.existsByCredentials_Username(username) || userRepository.findUserByCredentials_Username(username).isDeleted()) {
+            throw new NotFoundException("The provided username doesn't exist.");
+        }
+        User userByUserName = userRepository.findUserByCredentials_Username(username);
+        List<Tweet> mentions = userByUserName.getMentions();
+
+        return tweetMapper.entitiesToDtos(mentions);
+    }
+
     private void verifyUsers(String username, CredentialsDto credentials) {
         if (credentials == null || credentials.getUsername() == null || credentials.getPassword() == null) {
             throw new BadRequestException("Credentials can't be null.");
