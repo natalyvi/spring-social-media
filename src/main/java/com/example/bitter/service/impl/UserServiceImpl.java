@@ -206,27 +206,26 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-//    // TODO: Test again after the users/@[username}/follow is done
-//    @Override
-//    public List<UserResponseDto> getFollowersOfTheUser(String username) {
-//        User userByUsername = userRepository.findUserByCredentials_Username(username);
-//        List<User> followers = userByUsername.getFollowers();
-//
-//        return userMapper.entitiesToDtos(followers);
-//    }
+    @Override
+    public List<UserResponseDto> getFollowersOfTheUser(String username) {
+        User userByUsername = userRepository.findUserByCredentials_Username(username);
+        List<User> followers = userByUsername.getFollowers();
 
-//    @Override
-//    public List<UserResponseDto> getUsersFollowedByUsername(String username) {
-//        if (!userRepository.existsByCredentials_Username(username)) {
-//            throw new NotFoundException("The provided username doesn't exist.");
-//        }
-//        if (userRepository.findUserByCredentials_Username(username).isDeleted()) {
-//            throw new BadRequestException("The provided username is deleted.");
-//        }
-//        User userByUsername = userRepository.findUserByCredentials_Username(username);
-//        List<User> usersFollowedByUsername = userRepository.findUsersByFollowersContaining(userByUsername);
-//
-//        return userMapper.entitiesToDtos(usersFollowedByUsername);
-//    }
+        return userMapper.entitiesToDtos(followers);
+    }
+
+    @Override
+    public List<UserResponseDto> getUsersFollowedByUsername(String username) {
+        if (!userRepository.existsByCredentials_Username(username)) {
+            throw new NotFoundException("The provided username doesn't exist.");
+        }
+        if (userRepository.findUserByCredentials_Username(username).isDeleted()) {
+            throw new BadRequestException("The provided username is deleted.");
+        }
+        User userByUsername = userRepository.findUserByCredentials_Username(username);
+        List<User> usersFollowedByUsername = userByUsername.getFollowing();
+
+        return userMapper.entitiesToDtos(usersFollowedByUsername);
+    }
 
 }

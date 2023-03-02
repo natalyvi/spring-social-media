@@ -18,9 +18,9 @@ public interface UserService {
 
     UserResponseDto updateUserProfileByUsername(String username, UserRequestDto userRequestDto);
 
-//    List<UserResponseDto> getUsersFollowedByUsername(String username);
+    List<UserResponseDto> getUsersFollowedByUsername(String username);
 
-//    List<UserResponseDto> getFollowersOfTheUser (String username);
+    List<UserResponseDto> getFollowersOfTheUser (String username);
 
     List<TweetResponseDto> getTweets(String username);
 
