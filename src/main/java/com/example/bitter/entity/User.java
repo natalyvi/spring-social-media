@@ -1,6 +1,7 @@
 package com.example.bitter.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -31,6 +32,7 @@ public class User {
     private Profile profile;
 
     @OneToMany(mappedBy = "author")
+    @EqualsAndHashCode.Exclude
     private List<Tweet> tweets;
 
     @ManyToMany
@@ -39,6 +41,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "tweet_id")
     )
+    @EqualsAndHashCode.Exclude
     private List<Tweet> likes;
 
     @ManyToMany
@@ -47,6 +50,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "tweet_id")
     )
+    @EqualsAndHashCode.Exclude
     private List<Tweet> mentions;
 
     @ManyToMany
@@ -55,9 +59,11 @@ public class User {
             joinColumns = @JoinColumn(name = "follower_id"),
             inverseJoinColumns = @JoinColumn(name = "following_id")
     )
+    @EqualsAndHashCode.Exclude
     private Set<User> followers;
 
     @ManyToMany(mappedBy = "followers")
+    @EqualsAndHashCode.Exclude
     private Set<User> following;
 
 }

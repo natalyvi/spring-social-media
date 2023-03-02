@@ -15,6 +15,8 @@ public class TweetResponseDto {
 
     private boolean deleted;
 
+    private UserResponseDto author;
+
     private String content;
 
     private TweetResponseDto inReplyTo;

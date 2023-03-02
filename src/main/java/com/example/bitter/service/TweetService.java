@@ -22,7 +22,7 @@ public interface TweetService {
 
     List<TweetResponseDto> getRepliesToTweet(Long id);
 
-    TweetResponseDto repostTweet(Long id);
+    TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto);
 
     List<TweetResponseDto> getRepostsOfTweet(Long id);
 
