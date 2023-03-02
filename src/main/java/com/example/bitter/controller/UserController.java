@@ -48,7 +48,7 @@ public class UserController {
         return userService.getUsersFollowedByUsername(username);
     }
     @GetMapping("/@{username}/followers")
-    public List<UserResponseDto> getFollowersOfTheUser(@PathVariable String username, @RequestBody UserRequestDto userRequestDto){
+    public List<UserResponseDto> getFollowersOfTheUser(@PathVariable String username){
         return userService.getFollowersOfTheUser(username);
     }
 
