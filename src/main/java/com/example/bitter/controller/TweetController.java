@@ -1,5 +1,6 @@
 package com.example.bitter.controller;
 
+import com.example.bitter.dto.ContextDto;
 import com.example.bitter.dto.CredentialsDto;
 import com.example.bitter.dto.HashtagDto;
 import com.example.bitter.dto.TweetRequestDto;
@@ -67,6 +68,7 @@ public class TweetController {
     // POST tweets/{id}/reply
     // TODO: Shawn
     @PostMapping("/{id}/reply")
+    @ResponseStatus(HttpStatus.CREATED)
     public TweetResponseDto replyTweet(@PathVariable Long id, TweetRequestDto tweetRequestDto) {
         return tweetService.replyTweet(id, tweetRequestDto);
     }
@@ -91,6 +93,10 @@ public class TweetController {
 
     // GET tweets/{id}/context
     // TODO: Shawn
+    @GetMapping("/{id}/context")
+    public ContextDto getContextByTweet(@PathVariable Long id) {
+        return tweetService.getContextByTweetId(id);
+    }
 
 
     // DELETE tweets/{id}

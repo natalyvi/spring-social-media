@@ -20,6 +20,8 @@ import com.example.bitter.repository.HashtagRepository;
 import com.example.bitter.repository.TweetRepository;
 import com.example.bitter.repository.UserRepository;
 import com.example.bitter.service.TweetService;
+
+import ch.qos.logback.core.Context;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -239,8 +241,26 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public ContextDto getContextByTweetId(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getContextByTweetId'");
+        Tweet tweet = getTweetIfExists(id);
+        Tweet previousTweet = tweet;
+        List<TweetResponseDto> before = new ArrayList<>();
+        while (previousTweet.getInReplyTo() != null) {
+            if (!previousTweet.getInReplyTo().isDeleted()) {
+                before.add(tweetMapper.entityToDto(previousTweet));
+            }
+            previousTweet = previousTweet.getInReplyTo();
+        }
+        List<TweetResponseDto> after = new ArrayList<>();
+        for (Tweet t : tweet.getReplies()) {
+            if (!t.isDeleted()) {
+                after.add(tweetMapper.entityToDto(t));
+            }
+        }
+
+        ContextDto contextDto = new ContextDto();
+        contextDto.setBefore(before);
+        contextDto.setAfter(after);
+        return contextDto;
     }
 
     
