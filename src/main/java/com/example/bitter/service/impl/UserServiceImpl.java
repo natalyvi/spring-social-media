@@ -29,14 +29,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
+        if (userRequestDto.getCredentials() == null) {
+            throw new BadRequestException("Credentials can't be null.");
+        }
         if (userRequestDto.getCredentials().getUsername() == null) {
             throw new BadRequestException("The provided username is null.");
         }
         if (userRequestDto.getCredentials().getPassword() == null) {
             throw new BadRequestException("The provided password is null.");
         }
+        if (userRequestDto.getProfile() == null) {
+            throw new BadRequestException("Profile can't be null.");
+        }
         if (userRequestDto.getProfile().getEmail() == null) {
             throw new BadRequestException("The provided email is null.");
+        }
+        if (userRepository.existsByCredentials_Username(userRequestDto.getCredentials().getUsername())) {
+            throw new BadRequestException("The username already exists.");
         }
         User userToSave = userMapper.dtoToEntity(userRequestDto);
         userRepository.saveAndFlush(userToSave);
@@ -75,6 +84,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto updateUserProfileByUsername(String username, UserRequestDto userRequestDto) {
         User updatedUser = userMapper.dtoToEntity(userRequestDto);
+        if (userRequestDto.getCredentials() == null) {
+            throw new BadRequestException("Credentials can't be null.");
+        }
         if (!userRepository.existsByCredentials_Username(username)) {
             throw new NotFoundException("The provided username doesn't exist.");
         }
@@ -87,7 +99,10 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findUserByCredentials_Username(username).isDeleted()) {
             throw new BadRequestException("The provided username is deleted.");
         }
-        if (updatedUser.getProfile().getEmail() == null){
+        if (userRequestDto.getProfile() == null) {
+            throw new BadRequestException("Profile can't be null.");
+        }
+        if (updatedUser.getProfile().getEmail() == null) {
             throw new BadRequestException("The provided email is null.");
         }
         User userToUpdate = userRepository.findUserByCredentials_Username(username);
@@ -99,11 +114,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDto> getUsersFollowedByUsername(String username) {
+        if (!userRepository.existsByCredentials_Username(username)) {
+            throw new NotFoundException("The provided username doesn't exist.");
+        }
+        if (userRepository.findUserByCredentials_Username(username).isDeleted()) {
+            throw new BadRequestException("The provided username is deleted.");
+        }
         User userByUsername = userRepository.findUserByCredentials_Username(username);
         List<User> usersFollowedByUsername = userRepository.findAllByFollowersContaining(userByUsername);
 
         return userMapper.entitiesToDtos(usersFollowedByUsername);
-
     }
 
 }

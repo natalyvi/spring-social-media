@@ -25,24 +25,25 @@ public class UserController {
         return userService.createUser(userRequestDto);
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/@{username}")
     public UserResponseDto getUserByUsername(@PathVariable String username) {
         return userService.getUserByUsername(username);
     }
 
-    @DeleteMapping("/{username}")
+    @DeleteMapping("/@{username}")
     public UserResponseDto deleteUserByUsername(@PathVariable String username) {
         return userService.deleteUserByUsername(username);
     }
 
-    @PatchMapping("/{username}")
+    // TODO: doesn't pass the tests for some reason
+    @PatchMapping("/@{username}")
     public UserResponseDto updateUserProfileByUsername(@PathVariable String username, @RequestBody UserRequestDto userRequestDto) {
         return userService.updateUserProfileByUsername(username, userRequestDto);
     }
 
-    @GetMapping("/{username}/following")
+    /*@GetMapping("/@{username}/following")
     public List<UserResponseDto> getUsersFollowedByUsername(@PathVariable String username){
         return userService.getUsersFollowedByUsername(username);
-    }
+    }*/
 
 }
