@@ -67,4 +67,9 @@ public class UserController {
         userService.unfollow(username, credentials);
     }
 
+    @GetMapping("/@{username}/feed")
+    public  List<TweetResponseDto> getUserFeedByUsername(@PathVariable String username){
+        return userService.getUserFeedByUsername(username);
+    }
+
 }
