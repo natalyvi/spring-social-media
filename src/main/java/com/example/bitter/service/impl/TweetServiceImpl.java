@@ -58,45 +58,45 @@ public class TweetServiceImpl implements TweetService {
     }
 
     public Tweet parseAndAddMentions(Tweet tweet) {
-        Pattern pattern = Pattern.compile("^(@[a-zA-Z0-9_]{1,}[\\s\\S])*$");
+        Pattern pattern = Pattern.compile("(@+[a-zA-Z0-9(_)]{1,})");
         Set<User> mentions = new HashSet<>();
         Matcher matcher = pattern.matcher(tweet.getContent());
 
-        // parse usernames
+        // parse usernames, then update tweet mentions for each user
         while (matcher.find()) {
-            String username = matcher.group().substring(1);
-            mentions.add(userMapper.responseToEntity(userService.getUserByUsername(username)));
-        }
-        // update tweet mentions for each user
-        for (User user : mentions) {
+            String username = matcher.group(0).substring(1);
+            User user = userRepository.findUserByCredentials_Username(username);
             List<Tweet> t = user.getMentions();
-            t.add(tweet);
+            Tweet savedTweet = tweetRepository.saveAndFlush(tweet); // literally won't work without doing this
+            t.add(savedTweet);
             user.setMentions(t);
-            userRepository.saveAndFlush(user);
+            userRepository.save(user);
+            mentions.add(userRepository.saveAndFlush(user));
         }
+
         // update tweet
-        Set<User> u = new HashSet<>(mentions);
-        tweet.setMentioned(u);
+        tweet.setMentioned(mentions);
         return tweetRepository.saveAndFlush(tweet);
     }
 
     public Tweet parseAndAddHashtags(Tweet tweet) {
-        Pattern pattern = Pattern.compile("/(#+[a-zA-Z0-9(_)]{1,})/");
+        Pattern pattern = Pattern.compile("(#+[a-zA-Z0-9(_)]{1,})");
         Set<Hashtag> tags = new HashSet<>();
         Matcher matcher = pattern.matcher(tweet.getContent());
 
         // parse hashtags
         while (matcher.find()) {
-            String label = matcher.group().substring(1);
+            String label = matcher.group(0).substring(1);
             Optional<Hashtag> optionalTag = hashtagRepository.findByLabel(label);
             Hashtag tag;
-            // update existing tags or create a new tag
+            // update existing tags or create a new tag, then add the tag
             if (optionalTag.isPresent()) {
                 tag = optionalTag.get();
             } else {
                 tag = new Hashtag();
                 tag.setLabel(label);
                 tag.setFirstUsed(Timestamp.valueOf(LocalDateTime.now()));
+                tag.setTweets(new ArrayList<Tweet>());
             }
             tag.setLastUsed(Timestamp.valueOf(LocalDateTime.now()));
             List<Tweet> t = tag.getTweets();
@@ -104,10 +104,8 @@ public class TweetServiceImpl implements TweetService {
             tag.setTweets(t);
             tags.add(tag);
         }
-        for (Hashtag h : tags) System.out.println(h.getLabel());
-
-
         hashtagRepository.saveAllAndFlush(tags);
+
         tweet.setHashtags(tags);
         return tweetRepository.saveAndFlush(tweet);
     }
@@ -128,10 +126,10 @@ public class TweetServiceImpl implements TweetService {
 
         tweet.setAuthor(userRepository.findUserByCredentials_Username(tweetRequestDto.getCredentials().getUsername()));
 
-        Tweet updateTweetWithMentions = parseAndAddMentions(tweet);
-        Tweet updateTweetWithHashtags = parseAndAddHashtags(updateTweetWithMentions);
+        Tweet updatedTweetWithMentions = parseAndAddMentions(tweet);
+        Tweet updatedTweetWithHashtags = parseAndAddHashtags(updatedTweetWithMentions);
 
-        return tweetMapper.entityToDto(updateTweetWithHashtags);
+        return tweetMapper.entityToDto(updatedTweetWithHashtags);
     }
 
     // Throw error is the tweet is deleted or doesn't exist, or if the credentials don't match an active user in the DB
