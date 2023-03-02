@@ -13,6 +13,7 @@ import com.example.bitter.entity.User;
 import com.example.bitter.exception.BadRequestException;
 import com.example.bitter.exception.NotFoundException;
 import com.example.bitter.mapper.CredentialsMapper;
+import com.example.bitter.mapper.HashtagMapper;
 import com.example.bitter.mapper.TweetMapper;
 import com.example.bitter.mapper.UserMapper;
 import com.example.bitter.repository.HashtagRepository;
@@ -37,6 +38,7 @@ public class TweetServiceImpl implements TweetService {
     private final UserServiceImpl userService;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
+    private final HashtagMapper hashtagMapper;
     private final HashtagRepository hashtagRepository;
 
     public Tweet getTweetIfExists(Long id) {
@@ -204,8 +206,7 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public List<HashtagDto> getTagsByTweetId(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTagsByTweetId'");
+        return hashtagMapper.entitiesToDto(hashtagRepository.findByTweets_Id(id));
     }
 
     @Override
