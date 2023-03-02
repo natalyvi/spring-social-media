@@ -4,10 +4,12 @@ import com.example.bitter.dto.CredentialsDto;
 import com.example.bitter.dto.TweetRequestDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserResponseDto;
+import com.example.bitter.entity.Credentials;
 import com.example.bitter.entity.Tweet;
 import com.example.bitter.entity.User;
 import com.example.bitter.exception.BadRequestException;
 import com.example.bitter.exception.NotFoundException;
+import com.example.bitter.mapper.CredentialsMapper;
 import com.example.bitter.mapper.TweetMapper;
 import com.example.bitter.mapper.UserMapper;
 import com.example.bitter.repository.TweetRepository;
@@ -27,10 +29,9 @@ public class TweetServiceImpl implements TweetService {
     private final TweetRepository tweetRepository;
     private final TweetMapper tweetMapper;
     private final UserServiceImpl userService;
-
     private final UserMapper userMapper;
-
     private final UserRepository userRepository;
+    private final CredentialsMapper credentialsMapper;
 
     public Tweet getTweetIfExists(Long id) {
         Optional<Tweet> tweet = tweetRepository.findById(id);
@@ -140,9 +141,18 @@ public class TweetServiceImpl implements TweetService {
         return tweetMapper.entitiesToDtos(tweet.getReplies());
     }
 
+    // Throw error is the tweet is deleted or doesn't exist, or if the credentials don't match an active user in the DB
+    // No content, author of the repost should match the credentials provided in the request body
     @Override
-    public TweetResponseDto repostTweet(Long id) {
-        return null;
+    public TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto) {
+        if (credentialsDto == null) throw new BadRequestException("No credentials provided");
+
+        Tweet tweet = getTweetIfExists(id);
+        Tweet newTweet = new Tweet();
+        newTweet.setAuthor(userRepository.findUserByCredentials_Username(credentialsDto.getUsername()));
+        newTweet.setRepostOf(tweet);
+
+        return tweetMapper.entityToDto(tweetRepository.saveAndFlush(newTweet));
     }
 
     @Override
