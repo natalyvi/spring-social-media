@@ -35,6 +35,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
+        User userToSave = userMapper.dtoToEntity(userRequestDto);
         if (userRequestDto.getCredentials() == null) {
             throw new BadRequestException("Credentials can't be null.");
         }
@@ -51,9 +52,27 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("The provided email is null.");
         }
         if (userRepository.existsByCredentials_Username(userRequestDto.getCredentials().getUsername())) {
-            throw new BadRequestException("The username already exists.");
+            User userByUsername = userRepository.findUserByCredentials_Username(userRequestDto.getCredentials().getUsername());
+            if (userByUsername.isDeleted()) {
+                userByUsername.setDeleted(false);
+                if (userToSave.getProfile().getFirstName() != null) {
+                    userByUsername.getProfile().setFirstName((userToSave.getProfile().getFirstName()));
+                }
+                if (userToSave.getProfile().getLastName() != null) {
+                    userByUsername.getProfile().setLastName(userToSave.getProfile().getLastName());
+                }
+                if (userToSave.getProfile().getPhone() != null) {
+                    userByUsername.getProfile().setPhone(userRequestDto.getProfile().getPhone());
+                }
+                if (userToSave.getProfile().getEmail() != null) {
+                    userByUsername.getProfile().setEmail(userRequestDto.getProfile().getEmail());
+                }
+                userToSave = userByUsername;
+            } else {
+                throw new BadRequestException("user already exists.");
+            }
         }
-        User userToSave = userMapper.dtoToEntity(userRequestDto);
+
         userRepository.saveAndFlush(userToSave);
 
         return userMapper.entityToDto(userToSave);
@@ -82,6 +101,7 @@ public class UserServiceImpl implements UserService {
         }
         User userToDelete = userRepository.findUserByCredentials_Username(username);
         userToDelete.setDeleted(true);
+
         userRepository.saveAndFlush(userToDelete);
 
         return userMapper.entityToDto(userToDelete);
