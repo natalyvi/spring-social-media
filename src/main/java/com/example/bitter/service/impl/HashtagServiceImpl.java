@@ -1,6 +1,7 @@
 package com.example.bitter.service.impl;
 
 import com.example.bitter.service.HashtagService;
+import com.example.bitter.service.TweetService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +25,7 @@ public class HashtagServiceImpl implements HashtagService{
     
     private final HashtagRepository hashtagRepository;
     private final HashtagMapper hashtagMapper;
+    private final TweetService tweetService;
     
     @Override
     public List<HashtagDto> getAllTags() {
@@ -41,8 +43,7 @@ public class HashtagServiceImpl implements HashtagService{
     
     @Override
     public List<TweetResponseDto> getAllTweetsWithTag(String label) {
-        // TODO: Will need methods from TweetService
-        return null;
+        return tweetService.getAllTweetsWithTag(label);
     }
     @Override
     public HashtagDto updateTag(Tweet tweet, String label) {

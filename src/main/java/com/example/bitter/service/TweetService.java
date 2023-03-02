@@ -27,4 +27,6 @@ public interface TweetService {
     List<TweetResponseDto> getRepostsOfTweet(Long id);
 
     TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto);
+
+    List<TweetResponseDto> getAllTweetsWithTag(String label);
 }
