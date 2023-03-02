@@ -9,9 +9,12 @@ import java.util.List;
 public interface UserService {
     List<UserResponseDto> getAllUsers();
 
-    ResponseEntity<UserResponseDto> createUser(UserRequestDto userRequestDto);
+    UserResponseDto createUser(UserRequestDto userRequestDto);
 
-    ResponseEntity<UserResponseDto> getUserByUsername(String username);
+    UserResponseDto getUserByUsername(String username);
 
-    ResponseEntity<UserResponseDto> deleteUserByusername(String username);
+   UserResponseDto deleteUserByusername(String username);
+
+    UserResponseDto updateUserProfileByUsername(String username, UserRequestDto userRequestDto);
+
 }

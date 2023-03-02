@@ -15,4 +15,6 @@ public interface TweetMapper {
     // TODO: List vs Set depends on endpoint requirements
     List<TweetResponseDto> entitiesToDtos(List<Tweet> entities);
     Tweet dtoToEntity(TweetRequestDto tweetRequestDto);
+
+    Tweet responseToEntity(TweetResponseDto tweetResponseDto);
 }

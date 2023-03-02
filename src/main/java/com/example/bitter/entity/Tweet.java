@@ -52,5 +52,5 @@ public class Tweet {
     private Set<User> likedBy;
 
     @ManyToMany(mappedBy = "mentions")
-    private Set<User> mentionedBy;
+    private Set<User> mentioned;
 }
