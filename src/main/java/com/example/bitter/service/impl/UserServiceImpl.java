@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
     public List<TweetResponseDto> getTweets(String username) {
         User userByUsername = userRepository.findUserByCredentials_Username(username);
         List<Tweet> tweets = userByUsername.getTweets();
-
+        tweets.removeIf(Tweet::isDeleted);
         return tweetMapper.entitiesToDtos(tweets);
     }
 
