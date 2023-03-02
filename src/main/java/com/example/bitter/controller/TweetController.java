@@ -46,9 +46,9 @@ public class TweetController {
 
 
     // POST tweets/{id}/like
-    @PostMapping("/{id}")
+    @PostMapping("/{id}/like")
     @ResponseStatus(HttpStatus.CREATED)
-    public void likeTweet(@PathVariable Long id, CredentialsDto credentialsDto) {
+    public void likeTweet(@PathVariable Long id, @RequestBody CredentialsDto credentialsDto) {
         tweetService.likeTweet(id, credentialsDto);
     }
 

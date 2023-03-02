@@ -6,7 +6,6 @@ import com.example.bitter.dto.HashtagDto;
 import com.example.bitter.dto.TweetRequestDto;
 import com.example.bitter.dto.TweetResponseDto;
 import com.example.bitter.dto.UserResponseDto;
-import com.example.bitter.entity.Credentials;
 import com.example.bitter.entity.Hashtag;
 import com.example.bitter.entity.Tweet;
 import com.example.bitter.entity.User;
@@ -14,6 +13,7 @@ import com.example.bitter.exception.BadRequestException;
 import com.example.bitter.exception.NotFoundException;
 import com.example.bitter.mapper.CredentialsMapper;
 import com.example.bitter.mapper.HashtagMapper;
+
 import com.example.bitter.mapper.TweetMapper;
 import com.example.bitter.mapper.UserMapper;
 import com.example.bitter.repository.HashtagRepository;
@@ -35,7 +35,6 @@ public class TweetServiceImpl implements TweetService {
 
     private final TweetRepository tweetRepository;
     private final TweetMapper tweetMapper;
-    private final UserServiceImpl userService;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final HashtagMapper hashtagMapper;
@@ -45,6 +44,12 @@ public class TweetServiceImpl implements TweetService {
         Optional<Tweet> tweet = tweetRepository.findById(id);
         if (tweet.isEmpty() || tweet.get().isDeleted()) throw new NotFoundException("Tweet " + id + " not found");
         return tweet.get();
+    }
+
+    public void validateCredentials(CredentialsDto credentialsDto) {
+        if (credentialsDto == null
+                || credentialsDto.getUsername() == null
+                || credentialsDto.getPassword() == null) throw new BadRequestException("Incomplete credentials");
     }
 
     // Must be in reverse-chronological order
@@ -98,7 +103,7 @@ public class TweetServiceImpl implements TweetService {
                 tag = new Hashtag();
                 tag.setLabel(label);
                 tag.setFirstUsed(Timestamp.valueOf(LocalDateTime.now()));
-                tag.setTweets(new ArrayList<Tweet>());
+                tag.setTweets(new ArrayList<>());
             }
             tag.setLastUsed(Timestamp.valueOf(LocalDateTime.now()));
             List<Tweet> t = tag.getTweets();
@@ -133,13 +138,14 @@ public class TweetServiceImpl implements TweetService {
 
     private Tweet createTweetEntity(TweetRequestDto tweetRequestDto) {
         if (tweetRequestDto.getCredentials() == null) throw new BadRequestException("No credentials provided");
+        validateCredentials(tweetRequestDto.getCredentials());
         // check if user exists
         User user;
         user = userRepository.findUserByCredentials_Username(tweetRequestDto.getCredentials().getUsername());
         if (user == null) throw new BadRequestException("Invalid credentials");
 
+        if (tweetRequestDto.getContent() == null) throw new BadRequestException("New tweet must contain content");
         Tweet tweet = tweetMapper.dtoToEntity(tweetRequestDto);
-        if (tweet.getContent() == null) throw new BadRequestException("New tweet must contain content");
 
         tweet.setAuthor(userRepository.findUserByCredentials_Username(tweetRequestDto.getCredentials().getUsername()));
 
@@ -153,10 +159,14 @@ public class TweetServiceImpl implements TweetService {
     // On successful operation, return no response body
     @Override
     public void likeTweet(Long id, CredentialsDto credentialsDto) {
-        if (credentialsDto == null) throw new BadRequestException("No credentials provided");
+        validateCredentials(credentialsDto);
         Tweet tweet = getTweetIfExists(id);
         User user;
-        user = userMapper.responseToEntity(userService.getUserByUsername(credentialsDto.getUsername()));
+        try {
+            user = userRepository.findUserByCredentials_Username(credentialsDto.getUsername());
+        } catch (NotFoundException e) {
+            throw e;
+        }
         if (user == null) throw new BadRequestException("Invalid credentials");
 
         Set<User> u = tweet.getLikedBy();
@@ -189,15 +199,16 @@ public class TweetServiceImpl implements TweetService {
     @Override
     public List<TweetResponseDto> getRepliesToTweet(Long id) {
         Tweet tweet = getTweetIfExists(id);
-        return tweetMapper.entitiesToDtos(tweet.getReplies());
+        List<Tweet> replies = new ArrayList<>(tweet.getReplies());
+        replies.removeIf(Tweet::isDeleted);
+        return tweetMapper.entitiesToDtos(replies);
     }
 
     // Throw error is the tweet is deleted or doesn't exist, or if the credentials don't match an active user in the DB
     // No content, author of the repost should match the credentials provided in the request body
     @Override
     public TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto) {
-        if (credentialsDto == null) throw new BadRequestException("No credentials provided");
-
+        validateCredentials(credentialsDto);
         Tweet tweet = getTweetIfExists(id);
         Tweet newTweet = new Tweet();
         newTweet.setAuthor(userRepository.findUserByCredentials_Username(credentialsDto.getUsername()));
@@ -209,7 +220,9 @@ public class TweetServiceImpl implements TweetService {
     @Override
     public List<TweetResponseDto> getRepostsOfTweet(Long id) {
         Tweet tweet = getTweetIfExists(id);
-        return tweetMapper.entitiesToDtos(tweet.getReposts());
+        List<Tweet> reposts = new ArrayList<>(tweet.getReposts());
+        reposts.removeIf(Tweet::isDeleted);
+        return tweetMapper.entitiesToDtos(reposts);
     }
 
     @Override
