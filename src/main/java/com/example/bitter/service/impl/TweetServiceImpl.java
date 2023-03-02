@@ -117,6 +117,21 @@ public class TweetServiceImpl implements TweetService {
     // Must parse @usernames and #hashtags
     @Override
     public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
+        return tweetMapper.entityToDto(createTweetEntity(tweetRequestDto));
+    }
+
+    @Override
+    public TweetResponseDto replyTweet(Long id, TweetRequestDto tweetRequestDto) {
+        Tweet targetTweet = getTweetIfExists(id);
+        Tweet sourceTweet = createTweetEntity(tweetRequestDto);
+        targetTweet.getReplies().add(sourceTweet);
+        sourceTweet.setInReplyTo(targetTweet);
+        tweetRepository.saveAndFlush(sourceTweet);
+        tweetRepository.saveAndFlush(targetTweet);
+        return tweetMapper.entityToDto(sourceTweet);
+    }
+
+    private Tweet createTweetEntity(TweetRequestDto tweetRequestDto) {
         if (tweetRequestDto.getCredentials() == null) throw new BadRequestException("No credentials provided");
         // check if user exists
         User user;
@@ -131,7 +146,7 @@ public class TweetServiceImpl implements TweetService {
         Tweet updatedTweetWithMentions = parseAndAddMentions(tweet);
         Tweet updatedTweetWithHashtags = parseAndAddHashtags(updatedTweetWithMentions);
 
-        return tweetMapper.entityToDto(updatedTweetWithHashtags);
+        return updatedTweetWithHashtags;
     }
 
     // Throw error is the tweet is deleted or doesn't exist, or if the credentials don't match an active user in the DB
@@ -215,9 +230,5 @@ public class TweetServiceImpl implements TweetService {
         throw new UnsupportedOperationException("Unimplemented method 'getContextByTweetId'");
     }
 
-    @Override
-    public TweetResponseDto replyTweet(Long id, TweetRequestDto tweetRequestDto) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'replyTweet'");
-    }
+    
 }
