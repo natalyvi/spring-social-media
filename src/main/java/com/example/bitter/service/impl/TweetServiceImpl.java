@@ -201,4 +201,9 @@ public class TweetServiceImpl implements TweetService {
         tweet.setDeleted(true);
         return tweetMapper.entityToDto(tweetRepository.saveAndFlush(tweet));
     }
+
+    @Override
+    public List<TweetResponseDto> getAllTweetsWithTag(String label) {
+        return tweetMapper.entitiesToDtos(tweetRepository.findByDeletedFalseAndHashtags_LabelOrderByPosted(label));
+    }
 }
