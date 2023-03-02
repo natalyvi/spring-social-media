@@ -40,6 +40,12 @@ public class TweetServiceImpl implements TweetService {
         return tweet.get();
     }
 
+    public void validateCredentials(CredentialsDto credentialsDto) {
+        if (credentialsDto == null
+                || credentialsDto.getUsername() == null
+                || credentialsDto.getPassword() == null) throw new BadRequestException("Invalid credentials");
+    }
+
     // Must be in reverse-chronological order
     @Override
     public List<TweetResponseDto> getAllTweets() {
@@ -91,7 +97,7 @@ public class TweetServiceImpl implements TweetService {
                 tag = new Hashtag();
                 tag.setLabel(label);
                 tag.setFirstUsed(Timestamp.valueOf(LocalDateTime.now()));
-                tag.setTweets(new ArrayList<Tweet>());
+                tag.setTweets(new ArrayList<>());
             }
             tag.setLastUsed(Timestamp.valueOf(LocalDateTime.now()));
             List<Tweet> t = tag.getTweets();
@@ -110,9 +116,7 @@ public class TweetServiceImpl implements TweetService {
     // Must parse @usernames and #hashtags
     @Override
     public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
-        if (tweetRequestDto.getCredentials() == null
-                || tweetRequestDto.getCredentials().getUsername() == null
-                || tweetRequestDto.getCredentials().getPassword() == null) throw new BadRequestException("No credentials provided");
+        validateCredentials(tweetRequestDto.getCredentials());
         // check if user exists
         User user;
         user = userRepository.findUserByCredentials_Username(tweetRequestDto.getCredentials().getUsername());
@@ -133,10 +137,14 @@ public class TweetServiceImpl implements TweetService {
     // On successful operation, return no response body
     @Override
     public void likeTweet(Long id, CredentialsDto credentialsDto) {
-        if (credentialsDto == null) throw new BadRequestException("No credentials provided");
+        validateCredentials(credentialsDto);
         Tweet tweet = getTweetIfExists(id);
         User user;
-        user = userRepository.findUserByCredentials_Username(credentialsDto.getUsername());
+        try {
+            user = userRepository.findUserByCredentials_Username(credentialsDto.getUsername());
+        } catch (NotFoundException e) {
+            throw e;
+        }
         if (user == null) throw new BadRequestException("Invalid credentials");
 
         Set<User> u = tweet.getLikedBy();
@@ -178,8 +186,7 @@ public class TweetServiceImpl implements TweetService {
     // No content, author of the repost should match the credentials provided in the request body
     @Override
     public TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto) {
-        if (credentialsDto == null) throw new BadRequestException("No credentials provided");
-
+        validateCredentials(credentialsDto);
         Tweet tweet = getTweetIfExists(id);
         Tweet newTweet = new Tweet();
         newTweet.setAuthor(userRepository.findUserByCredentials_Username(credentialsDto.getUsername()));

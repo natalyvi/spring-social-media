@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService {
         } catch (NotFoundException e) {
             throw e;
         }
-        if (user == null || user.isDeleted()) throw new NotFoundException("User " + username + " doesn't exist.");
+        if (user == null) throw new NotFoundException("User " + username + " doesn't exist.");
         List<Tweet> tweets = user.getTweets();
         tweets.removeIf(Tweet::isDeleted);
         return tweetMapper.entitiesToDtos(tweets);
