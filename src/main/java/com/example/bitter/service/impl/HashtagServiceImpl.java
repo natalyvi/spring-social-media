@@ -47,6 +47,7 @@ public class HashtagServiceImpl implements HashtagService{
     
     @Override
     public List<TweetResponseDto> getAllTweetsWithTag(String label) {
+        getTagByLabel(label); // check if tag exists
         return tweetMapper.entitiesToDtos(tweetRepository.findByDeletedFalseAndHashtags_LabelOrderByPosted(label));
     }
     @Override
